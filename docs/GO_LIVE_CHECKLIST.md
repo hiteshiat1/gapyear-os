@@ -1,0 +1,29 @@
+# Go-Live Checklist
+
+- [ ] Supabase project created
+- [ ] `supabase/schema.sql` executed
+- [ ] `supabase/seed.sql` executed
+- [ ] First user created
+- [ ] `select public.seed_sachith_academic_data('<user uuid>')` executed
+- [ ] RLS verified with a second user
+- [ ] Environment variables set locally
+- [ ] Environment variables set in Vercel
+- [ ] Login tested
+- [ ] Google OAuth tested if enabled
+- [ ] Subject CRUD tested
+- [ ] Topic create/archive tested
+- [ ] Daily check-in tested
+- [ ] Daily task create/status update tested
+- [ ] Mock CRUD tested
+- [ ] Error log create/resolve tested
+- [ ] Journal persistence tested
+- [ ] Tutor data persistence tested
+- [ ] Startup/project/event data persistence tested
+- [ ] Excel import preview tested
+- [ ] Excel duplicate import strategy verified with source row keys
+- [ ] Export tested at `/api/export`
+- [ ] Public portfolio tested
+- [ ] Private routes blocked while logged out
+- [ ] `npm run lint` passes
+- [ ] `npm run test` passes
+- [ ] `npm run build` passes

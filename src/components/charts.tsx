@@ -12,13 +12,25 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { scoreTrend, weeklyStudy } from "@/lib/data";
+type StudyChartRow = {
+  day: string;
+  Physics?: number;
+  Maths?: number;
+  "Further Maths"?: number;
+};
 
-export function StudyHoursChart() {
+type ScoreChartRow = {
+  date: string;
+  Physics?: number;
+  Maths?: number;
+  "Further Maths"?: number;
+};
+
+export function StudyHoursChart({ data }: { data: StudyChartRow[] }) {
   return (
     <div className="h-72">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={weeklyStudy}>
+        <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="day" tickLine={false} axisLine={false} />
           <YAxis tickLine={false} axisLine={false} />
@@ -33,11 +45,11 @@ export function StudyHoursChart() {
   );
 }
 
-export function ScoreTrendChart() {
+export function ScoreTrendChart({ data }: { data: ScoreChartRow[] }) {
   return (
     <div className="h-72">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={scoreTrend}>
+        <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="date" tickLine={false} axisLine={false} />
           <YAxis domain={[40, 90]} tickLine={false} axisLine={false} />

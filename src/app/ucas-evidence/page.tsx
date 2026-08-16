@@ -14,7 +14,7 @@ export default function UcasEvidencePage() {
           <Card key={question}>
             <h2 className="text-lg font-semibold">{question}</h2>
             <p className="mt-3 text-sm text-slate-600">
-              Each entry should capture what happened, what Sachith personally did, what he learned, the engineering concept involved, and why it increased interest.
+              Each entry should capture what happened, what the student personally did, what they learned, the engineering concept involved, and why it increased interest.
             </p>
           </Card>
         ))}

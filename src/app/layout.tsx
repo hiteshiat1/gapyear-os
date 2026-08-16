@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sachith Gap-Year OS",
+  title: "Gap Year OS",
   description:
     "A private academic, engineering, startup, and portfolio operating system for a structured gap year.",
 };

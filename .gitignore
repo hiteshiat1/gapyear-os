@@ -54,3 +54,5 @@ scaffold/
 # Misc
 *.pem
 *.local
+.vercel
+.env*

@@ -1,8 +1,11 @@
 import { AppShell } from "@/components/app-shell";
 import { Card, DataRow, PageHeader } from "@/components/ui";
-import { isSupabaseConfigured } from "@/lib/supabase";
+import { getCurrentProfile } from "@/lib/repositories/profiles";
+import { isSupabaseConfigured, useMockData } from "@/lib/supabase/config";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const profile = await getCurrentProfile();
+
   return (
     <AppShell>
       <PageHeader
@@ -23,9 +26,19 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold">Backend</h2>
           <div className="mt-4">
             <DataRow label="Supabase client" value={isSupabaseConfigured ? "Configured" : "Needs env vars"} />
+            <DataRow label="Mock mode" value={useMockData ? "Enabled" : "Disabled"} />
             <DataRow label="Auth methods" value="Email/password and Google planned" />
-            <DataRow label="Main user" value="Sachith" />
+            <DataRow label="Main user" value={profile?.fullName ?? "Student"} />
             <DataRow label="Future roles" value="Mentor, Tutor, Parent" />
+          </div>
+        </Card>
+        <Card>
+          <h2 className="text-lg font-semibold">Import / Export</h2>
+          <div className="mt-4">
+            <DataRow label="Excel import" value="Use /settings/import" />
+            <DataRow label="Excel export" value="Server route prepared after data is configured" />
+            <DataRow label="Idempotency" value="source file, sheet, row key" />
+            <DataRow label="Google Sheets" value="Use XLSX export/import, no two-way sync in V1" />
           </div>
         </Card>
       </div>
