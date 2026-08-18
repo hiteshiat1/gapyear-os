@@ -56,34 +56,39 @@ export async function AppShell({ children }: { children: ReactNode }) {
     getStudentOnboardingProfile().catch(() => null),
   ]);
   const displayName = profile?.fullName ?? "Student";
+  const initial = displayName.trim().charAt(0).toUpperCase() || "S";
   const tone = studentProfile?.visualTone ?? "masculine";
   const theme = tone === "feminine" ? feminineTheme : masculineTheme;
 
   return (
     <div className={`min-h-screen ${theme.view} text-slate-950`}>
       <aside className={`fixed inset-y-0 left-0 hidden w-72 border-r px-4 py-5 lg:block ${theme.menu}`}>
-        <div className="flex items-start gap-3 px-2">
-          <Link href="/settings/profile" aria-label="Profile management" className={`mt-0.5 rounded-md p-2 ${theme.icon}`}>
-            <CircleUserRound className="h-5 w-5" />
-          </Link>
-          <Link href="/" className="block min-w-0">
-            <p className="text-lg font-semibold tracking-tight">ALevels.io</p>
-            <p className={`mt-1 truncate text-sm ${theme.muted}`}>{displayName}</p>
-            <p className={`mt-1 text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
-          </Link>
-        </div>
-        <div className="mt-4 flex gap-2 px-2">
-          <Link href="/settings/profile" className={`rounded-md px-3 py-1.5 text-xs font-medium ${theme.softButton}`}>
-            Profile
-          </Link>
-          <form action={signOutAction}>
-            <button className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium ${theme.softButton}`}>
-              <LogOut className="h-3.5 w-3.5" />
-              Sign out
+        <div className="group relative px-2">
+          <div className="flex items-start gap-3">
+            <button
+              aria-label="Profile menu"
+              className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${theme.avatar}`}
+            >
+              {initial}
             </button>
-          </form>
+            <Link href="/" className="block min-w-0">
+              <p className="text-lg font-semibold tracking-tight">ALevels.io</p>
+              <p className={`mt-1 text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
+            </Link>
+          </div>
+          <div className="pointer-events-none absolute left-2 top-12 z-20 flex translate-y-1 gap-2 opacity-0 transition group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+            <Link href="/settings/profile" className={`rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
+              Profile
+            </Link>
+            <form action={signOutAction}>
+              <button className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
+                <LogOut className="h-3.5 w-3.5" />
+                Sign out
+              </button>
+            </form>
+          </div>
         </div>
-        <nav className="mt-7 space-y-1">
+        <nav className="mt-10 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -101,19 +106,28 @@ export async function AppShell({ children }: { children: ReactNode }) {
       </aside>
       <div className="lg:pl-72">
         <header className={`sticky top-0 z-10 border-b px-4 py-3 backdrop-blur lg:hidden ${theme.menu}`}>
-          <div className="flex items-start gap-3">
-            <Link href="/settings/profile" aria-label="Profile management" className={`rounded-md p-2 ${theme.icon}`}>
-              <CircleUserRound className="h-5 w-5" />
-            </Link>
+          <div className="group relative flex items-start gap-3">
+            <button
+              aria-label="Profile menu"
+              className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${theme.avatar}`}
+            >
+              {initial}
+            </button>
             <div className="min-w-0">
               <p className="text-base font-semibold">ALevels.io</p>
-              <p className={`truncate text-sm ${theme.muted}`}>{displayName}</p>
+              <p className={`text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
             </div>
-            <form action={signOutAction} className="ml-auto">
-              <button aria-label="Sign out" className={`rounded-md p-2 ${theme.icon}`}>
-                <LogOut className="h-5 w-5" />
-              </button>
-            </form>
+            <div className="pointer-events-none absolute left-0 top-12 z-20 flex translate-y-1 gap-2 opacity-0 transition group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+              <Link href="/settings/profile" className={`rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
+                Profile
+              </Link>
+              <form action={signOutAction}>
+                <button className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign out
+                </button>
+              </form>
+            </div>
           </div>
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
             {navItems.slice(0, 8).map((item) => (
@@ -138,6 +152,7 @@ const masculineTheme = {
   view: "bg-slate-100",
   muted: "text-slate-300",
   subtle: "text-slate-400",
+  avatar: "bg-slate-800 text-slate-100 hover:bg-slate-700",
   icon: "text-slate-100 hover:bg-slate-800",
   nav: "text-slate-300 hover:bg-slate-800 hover:text-white",
   softButton: "bg-slate-800 text-slate-100 hover:bg-slate-700",
@@ -149,6 +164,7 @@ const feminineTheme = {
   view: "bg-orange-50",
   muted: "text-rose-700",
   subtle: "text-rose-500",
+  avatar: "bg-white text-rose-900 hover:bg-rose-50",
   icon: "text-rose-900 hover:bg-rose-200",
   nav: "text-rose-800 hover:bg-rose-200 hover:text-rose-950",
   softButton: "bg-white/75 text-rose-900 hover:bg-white",

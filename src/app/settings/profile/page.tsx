@@ -49,7 +49,7 @@ export default async function ProfileSettingsPage() {
                     defaultChecked={(studentProfile?.visualTone ?? "masculine") === "masculine"}
                   />
                   <span>
-                    <span className="block font-medium">Masculine</span>
+                    <span className="block font-medium">Option 1</span>
                     <span className="mt-1 flex gap-2">
                       <span className="h-5 w-10 rounded bg-slate-950" />
                       <span className="h-5 w-10 rounded bg-slate-100" />
@@ -64,7 +64,7 @@ export default async function ProfileSettingsPage() {
                     defaultChecked={studentProfile?.visualTone === "feminine"}
                   />
                   <span>
-                    <span className="block font-medium">Feminine</span>
+                    <span className="block font-medium">Option 2</span>
                     <span className="mt-1 flex gap-2">
                       <span className="h-5 w-10 rounded bg-rose-100" />
                       <span className="h-5 w-10 rounded bg-orange-50" />
@@ -86,7 +86,7 @@ export default async function ProfileSettingsPage() {
             <div className="mt-4">
               <DataRow label="Name" value={profile?.fullName ?? "Student"} />
               <DataRow label="Stage" value={studentProfile?.stage ?? "Not set"} />
-              <DataRow label="Visual tone" value={studentProfile?.visualTone ?? "masculine"} />
+              <DataRow label="Visual tone" value={studentProfile?.visualTone === "feminine" ? "Option 2" : "Option 1"} />
             </div>
           </Card>
 

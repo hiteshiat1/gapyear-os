@@ -177,7 +177,7 @@ export default async function OnboardingPage() {
                     defaultChecked={(profile?.visualTone ?? "masculine") === "masculine"}
                   />
                   <span>
-                    <span className="block font-medium">Masculine</span>
+                    <span className="block font-medium">Option 1</span>
                     <span className="mt-1 flex gap-2">
                       <span className="h-5 w-10 rounded bg-slate-950" />
                       <span className="h-5 w-10 rounded bg-slate-100" />
@@ -192,7 +192,7 @@ export default async function OnboardingPage() {
                     defaultChecked={profile?.visualTone === "feminine"}
                   />
                   <span>
-                    <span className="block font-medium">Feminine</span>
+                    <span className="block font-medium">Option 2</span>
                     <span className="mt-1 flex gap-2">
                       <span className="h-5 w-10 rounded bg-rose-100" />
                       <span className="h-5 w-10 rounded bg-orange-50" />
