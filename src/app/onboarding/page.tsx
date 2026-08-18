@@ -1,36 +1,30 @@
 import { saveOnboardingAction } from "@/actions/onboarding-actions";
+import { seedReferenceDataAction } from "@/actions/reference-actions";
 import { AppShell } from "@/components/app-shell";
 import { Badge, Card, DataRow, PageHeader } from "@/components/ui";
 import { getStudentOnboardingProfile } from "@/lib/repositories/onboarding";
+import {
+  getBoardOfferings,
+  getGradeOptions,
+  getReferenceOptions,
+  getReferenceSpecifications,
+  getReferenceSubjects,
+} from "@/lib/repositories/reference-data";
 import { getSubjects } from "@/lib/repositories/subjects";
-
-const subjectDefaults = [
-  { name: "Mathematics", board: "Edexcel", spec: "9MA0", target: "A*" },
-  { name: "Further Mathematics", board: "Edexcel", spec: "9FM0", target: "A" },
-  { name: "Physics", board: "AQA", spec: "7408C", target: "A" },
-  { name: "", board: "Not sure", spec: "Not sure", target: "" },
-];
+import { ReferenceSubjectSelector } from "./reference-subject-selector";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 export default async function OnboardingPage() {
-  const [profile, subjects] = await Promise.all([
+  const [profile, subjects, referenceSubjects, boards, specifications, options, grades] = await Promise.all([
     getStudentOnboardingProfile().catch(() => null),
     getSubjects(),
+    getReferenceSubjects(),
+    getBoardOfferings(),
+    getReferenceSpecifications(),
+    getReferenceOptions(),
+    getGradeOptions(),
   ]);
-
-  const subjectRows = subjectDefaults.map((fallback, index) => {
-    const existing = subjects[index];
-    return {
-      name: existing?.name ?? fallback.name,
-      examBoard: existing?.examBoard ?? fallback.board,
-      specificationCode: existing?.specificationCode ?? fallback.spec,
-      specificationOptions: existing?.specificationOptions ?? "",
-      achievedGrade: existing?.achievedGrade ?? "",
-      targetGrade: existing?.targetGrade ?? fallback.target,
-      schoolPredictedGrade: existing?.schoolPredictedGrade ?? "",
-    };
-  });
 
   return (
     <AppShell>
@@ -77,77 +71,47 @@ export default async function OnboardingPage() {
 
             <section>
               <h2 className="text-lg font-semibold">A-Level Subjects</h2>
-              <div className="mt-4 space-y-4">
-                {subjectRows.map((subject, index) => (
-                  <div key={index} className="rounded-lg border border-slate-200 p-4">
-                    <div className="grid gap-3 md:grid-cols-3">
-                      <input
-                        name={`subject_${index}_name`}
-                        placeholder="Subject"
-                        defaultValue={subject.name}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                      />
-                      <input
-                        name={`subject_${index}_examBoard`}
-                        placeholder="Exam board or Not sure"
-                        defaultValue={subject.examBoard}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                      />
-                      <input
-                        name={`subject_${index}_specificationCode`}
-                        placeholder="Specification or Not sure"
-                        defaultValue={subject.specificationCode}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                      />
-                      <input
-                        name={`subject_${index}_specificationOptions`}
-                        placeholder="Options, if relevant"
-                        defaultValue={subject.specificationOptions}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                      />
-                      <input
-                        name={`subject_${index}_achievedGrade`}
-                        placeholder="Current / self estimate"
-                        defaultValue={subject.achievedGrade ?? ""}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                      />
-                      <input
-                        name={`subject_${index}_targetGrade`}
-                        placeholder="Target grade"
-                        defaultValue={subject.targetGrade ?? ""}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-                      />
-                      <input
-                        name={`subject_${index}_schoolPredictedGrade`}
-                        placeholder="School / UCAS prediction"
-                        defaultValue={subject.schoolPredictedGrade ?? ""}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm md:col-span-3"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {referenceSubjects.length ? (
+                <ReferenceSubjectSelector
+                  subjects={referenceSubjects}
+                  boards={boards}
+                  specifications={specifications}
+                  options={options}
+                  grades={grades}
+                />
+              ) : (
+                <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm text-amber-800">
+                    Canonical subject, board, specification, and grade reference data has not been loaded yet.
+                  </p>
+                  <form action={seedReferenceDataAction} className="mt-3">
+                    <button className="rounded-md bg-amber-900 px-4 py-2 text-sm font-medium text-white">
+                      Load reference data
+                    </button>
+                  </form>
+                </div>
+              )}
             </section>
 
             <section>
               <h2 className="text-lg font-semibold">Available Time</h2>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 <input
-                  name="weekdayStudyHours"
+                  name="weekdayDefaultMinutes"
                   type="number"
                   min="0"
-                  step="0.25"
-                  placeholder="Weekday study hours"
-                  defaultValue={profile?.weekdayStudyHours ?? ""}
+                  step="15"
+                  placeholder="Weekday study minutes"
+                  defaultValue={profile?.weekdayStudyHours ? Math.round(profile.weekdayStudyHours * 60) : ""}
                   className="rounded-md border border-slate-300 px-3 py-2 text-sm"
                 />
                 <input
-                  name="weekendStudyHours"
+                  name="weekendDefaultMinutes"
                   type="number"
                   min="0"
-                  step="0.25"
-                  placeholder="Weekend study hours"
-                  defaultValue={profile?.weekendStudyHours ?? ""}
+                  step="15"
+                  placeholder="Weekend study minutes"
+                  defaultValue={profile?.weekendStudyHours ? Math.round(profile.weekendStudyHours * 60) : ""}
                   className="rounded-md border border-slate-300 px-3 py-2 text-sm"
                 />
               </div>
@@ -232,7 +196,7 @@ export default async function OnboardingPage() {
             <div className="mt-4">
               <DataRow label="Subjects" value="Saved to your profile" />
               <DataRow label="Boards/specs" value="Can be Not sure" />
-              <DataRow label="Syllabus" value="Loaded where supported" />
+              <DataRow label="Syllabus" value="Canonical topics linked where supported" />
               <DataRow label="Plan" value="Initial 7 days generated" />
               <DataRow label="Progress" value="Starts blank, not invented" />
             </div>

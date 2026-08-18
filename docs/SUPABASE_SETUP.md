@@ -13,7 +13,8 @@ Run these files in the SQL editor in this order:
 3. `supabase/migrations/20260818_alevels_onboarding.sql`
 4. `supabase/migrations/20260818_profile_theme.sql`
 5. `supabase/migrations/20260818_future_map.sql`
-6. `supabase/seed.sql`
+6. `supabase/migrations/20260818_reference_onboarding.sql`
+7. `supabase/seed.sql`
 
 `schema.sql` creates tables, triggers, RLS policies, indexes, activity history, topic progress history, weekly snapshots, and import job tracking.
 
@@ -24,6 +25,8 @@ Run these files in the SQL editor in this order:
 `20260818_profile_theme.sql` adds the two-option visual tone setting used by the app shell.
 
 `20260818_future_map.sql` adds interests, course shortlist, university choices, career families, evidence links, and Future Map storage.
+
+`20260818_reference_onboarding.sql` adds canonical A-Level subjects, exam boards, offerings, specifications, papers, grade scales, student subject selections, grade history, and study availability.
 
 `seed.sql` creates a helper function only. It does not insert data until you call it with the first user UUID.
 
@@ -120,6 +123,7 @@ Then test:
 - `/onboarding`
 - `/subjects`
 - `/settings/syllabus`
+- `/settings/reference-data`
 - `/today`
 - `/explore`
 - `/universities`

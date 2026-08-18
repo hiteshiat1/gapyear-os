@@ -46,6 +46,7 @@ const navItems = [
   { href: "/goals", label: "Goals", icon: Target },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/settings/profile", label: "Profile", icon: CircleUserRound },
+  { href: "/settings/reference-data", label: "Reference Data", icon: Library },
   { href: "/settings/syllabus", label: "Syllabus", icon: BookOpen },
   { href: "/settings/import", label: "Import", icon: ClipboardCheck },
 ];

@@ -24,6 +24,12 @@ export type VisualTone = "masculine" | "feminine";
 
 export type OnboardingSubjectInput = {
   name: string;
+  referenceSubjectId?: string | null;
+  examBoardId?: string | null;
+  specificationId?: string | null;
+  selectedOptionIds?: string[];
+  confirmationStatus?: "confirmed" | "needs_confirmation";
+  topicSupportStatus?: "full" | "coming_soon" | "not_planned";
   examBoard?: string | null;
   specificationCode?: string | null;
   specificationOptions?: string | null;
@@ -62,6 +68,100 @@ export async function getStudentOnboardingProfile() {
     onboardingStep: data.onboarding_step,
     onboardingCompleted: data.onboarding_completed,
   } satisfies StudentOnboardingProfile;
+}
+
+export async function saveCanonicalOnboardingSubjects(inputs: OnboardingSubjectInput[]) {
+  const supabase = await getSupabaseForRead();
+  const user = await requireUser();
+
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  await saveOnboardingSubjects(inputs);
+
+  for (const input of inputs.filter((subject) => subject.referenceSubjectId)) {
+    const subjectId = input.referenceSubjectId;
+    if (!subjectId) continue;
+    const { data: studentSubject, error } = await supabase
+      .from("student_subjects")
+      .upsert(
+        {
+          owner_id: user.id,
+          subject_id: subjectId,
+          exam_board_id: input.examBoardId ?? null,
+          specification_id: input.specificationId ?? null,
+          self_grade: normalizeGrade(input.achievedGrade),
+          school_predicted_grade: normalizeGrade(input.schoolPredictedGrade),
+          target_grade: normalizeGrade(input.targetGrade),
+          specification_confirmation_status: input.confirmationStatus ?? "needs_confirmation",
+          topic_support_status: input.topicSupportStatus ?? "coming_soon",
+          active: true,
+          is_deleted: false,
+        },
+        { onConflict: "owner_id,subject_id" },
+      )
+      .select("id")
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    const historyRows = [
+      { grade_type: "self_estimate", grade: normalizeGrade(input.achievedGrade) },
+      { grade_type: "school_prediction", grade: normalizeGrade(input.schoolPredictedGrade) },
+    ].filter((row) => row.grade);
+
+    if (historyRows.length) {
+      const { error: historyError } = await supabase.from("grade_history").insert(
+        historyRows.map((row) => ({
+          owner_id: user.id,
+          student_subject_id: studentSubject.id,
+          grade_type: row.grade_type,
+          grade: row.grade,
+          source: "onboarding",
+        })),
+      );
+      if (historyError) throw new Error(historyError.message);
+    }
+
+    await supabase
+      .from("student_specification_options")
+      .delete()
+      .eq("owner_id", user.id)
+      .eq("student_subject_id", studentSubject.id);
+
+    if (input.selectedOptionIds?.length) {
+      const { error: optionError } = await supabase.from("student_specification_options").insert(
+        input.selectedOptionIds.map((optionId) => ({
+          owner_id: user.id,
+          student_subject_id: studentSubject.id,
+          specification_option_id: optionId,
+        })),
+      );
+      if (optionError) throw new Error(optionError.message);
+    }
+  }
+}
+
+export async function saveStudyAvailability(input: {
+  weekdayDefaultMinutes?: number | null;
+  weekendDefaultMinutes?: number | null;
+  lighterDays: string[];
+}) {
+  const supabase = await getSupabaseForRead();
+  const user = await requireUser();
+
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const { error } = await supabase.from("study_availability").upsert(
+    {
+      owner_id: user.id,
+      weekday_default_minutes: input.weekdayDefaultMinutes ?? null,
+      weekend_default_minutes: input.weekendDefaultMinutes ?? null,
+      lighter_days: input.lighterDays,
+    },
+    { onConflict: "owner_id" },
+  );
+
+  if (error) throw new Error(error.message);
 }
 
 export async function upsertStudentOnboardingProfile(input: {
@@ -185,4 +285,9 @@ function shortNameForSubject(name: string) {
   };
 
   return known[normalized.toLowerCase()] ?? normalized.slice(0, 12);
+}
+
+function normalizeGrade(value?: string | null) {
+  if (!value || value === "Not sure" || value === "Not provided yet") return null;
+  return value;
 }
