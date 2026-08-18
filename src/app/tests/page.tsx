@@ -11,13 +11,13 @@ export default async function TestsPage() {
   return (
     <AppShell>
       <PageHeader
-        eyebrow="Tests & Mocks"
-        title="Paper Completion Cycle"
-        description="A paper only counts as complete after it is completed, marked, errors are logged, corrections are done, weak topics are identified, and a retest is scheduled."
+        eyebrow="Assessments"
+        title="Assessment Evidence"
+        description="Diagnostics, homework tests, topic tests, school tests, mocks, prelims, exams, tutor assessments, and past papers all feed the same evidence loop."
       />
       <div className="grid gap-6 xl:grid-cols-[1fr_2fr]">
         <Card>
-          <h2 className="text-lg font-semibold">Add Paper</h2>
+          <h2 className="text-lg font-semibold">Add Assessment</h2>
           <form action={createExamAction} className="mt-4 space-y-3">
             <select name="subjectId" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
               <option value="">Choose subject</option>
@@ -25,7 +25,22 @@ export default async function TestsPage() {
                 <option key={subject.id} value={subject.id}>{subject.name}</option>
               ))}
             </select>
-            <input name="examType" defaultValue="Mock" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+            <select name="examType" defaultValue="Mock" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+              {[
+                "Diagnostic",
+                "Homework Test",
+                "Topic Test",
+                "School Test",
+                "Mock",
+                "Prelim",
+                "AS Exam",
+                "A-Level Exam",
+                "Tutor Assessment",
+                "Past Paper",
+              ].map((type) => (
+                <option key={type}>{type}</option>
+              ))}
+            </select>
             <input name="paper" placeholder="AQA 2023 Paper 1" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
             <div className="grid grid-cols-2 gap-3">
               <input name="examBoard" placeholder="Exam board" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
@@ -52,7 +67,10 @@ export default async function TestsPage() {
               ))}
             </select>
             <textarea name="notes" placeholder="Notes" className="min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-            <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white">Save paper</button>
+            <div className="rounded-lg border border-dashed border-slate-300 p-3 text-sm text-slate-500">
+              Upload extraction is staged for the next milestone. OCR/AI values will require confirmation before analytics.
+            </div>
+            <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white">Save assessment</button>
           </form>
         </Card>
         <Card>

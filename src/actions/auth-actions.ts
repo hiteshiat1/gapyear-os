@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getStudentOnboardingProfile } from "@/lib/repositories/onboarding";
 
 export async function signInWithPasswordAction(formData: FormData) {
   const supabase = await createClient();
@@ -20,7 +21,12 @@ export async function signInWithPasswordAction(formData: FormData) {
   }
 
   await ensureProfile();
-  redirect("/");
+  await redirectAfterAuth();
+}
+
+export async function redirectAfterAuth() {
+  const onboarding = await getStudentOnboardingProfile().catch(() => null);
+  redirect(onboarding?.onboardingCompleted ? "/" : "/onboarding");
 }
 
 export async function signUpWithPasswordAction(formData: FormData) {

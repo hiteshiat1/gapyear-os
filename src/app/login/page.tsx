@@ -14,7 +14,7 @@ export default async function LoginPage({
       <div className="mx-auto max-w-md">
         <PageHeader
           title="Sign in"
-          description="Private routes use Supabase Auth. The public portfolio remains viewable without signing in."
+          description="Private A-Level planning, assessment, progress, and evidence tracking for students."
         />
         {params.error ? (
           <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
@@ -53,7 +53,7 @@ export default async function LoginPage({
         </Card>
         <Card className="mt-4">
           <form action={signUpWithPasswordAction} className="space-y-4">
-            <p className="text-sm font-medium">Create first account</p>
+            <p className="text-sm font-medium">Create student account</p>
             <label className="block text-sm font-medium">
               Full name
               <input name="fullName" placeholder="Your name" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />

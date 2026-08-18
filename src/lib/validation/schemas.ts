@@ -7,8 +7,12 @@ export const subjectSchema = z.object({
   id: z.string().optional(),
   name: z.string().trim().min(1, "Subject name is required"),
   shortName: z.string().trim().min(1, "Short name is required"),
+  examBoard: optionalText,
+  specificationCode: optionalText,
+  specificationOptions: optionalText,
   achievedGrade: optionalText,
   targetGrade: optionalText,
+  schoolPredictedGrade: optionalText,
   active: z.coerce.boolean().default(false),
 });
 

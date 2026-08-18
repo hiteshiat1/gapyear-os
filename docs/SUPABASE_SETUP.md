@@ -10,11 +10,20 @@ Run these files in the SQL editor in this order:
 
 1. `supabase/schema.sql`
 2. `supabase/migrations/20260816_syllabus_planner.sql`
-3. `supabase/seed.sql`
+3. `supabase/migrations/20260818_alevels_onboarding.sql`
+4. `supabase/migrations/20260818_profile_theme.sql`
+5. `supabase/migrations/20260818_future_map.sql`
+6. `supabase/seed.sql`
 
 `schema.sql` creates tables, triggers, RLS policies, indexes, activity history, topic progress history, weekly snapshots, and import job tracking.
 
 `20260816_syllabus_planner.sql` adds official syllabus reference topics, per-user topic progress, diagnostics, planner metadata, and paper-code fields.
+
+`20260818_alevels_onboarding.sql` adds resumable student onboarding, stage, study availability, and board/specification/prediction fields on subjects.
+
+`20260818_profile_theme.sql` adds the two-option visual tone setting used by the app shell.
+
+`20260818_future_map.sql` adds interests, course shortlist, university choices, career families, evidence links, and Future Map storage.
 
 `seed.sql` creates a helper function only. It does not insert data until you call it with the first user UUID.
 
@@ -108,9 +117,14 @@ npm run dev
 Then test:
 
 - `/login`
+- `/onboarding`
 - `/subjects`
 - `/settings/syllabus`
 - `/today`
+- `/explore`
+- `/universities`
+- `/careers`
+- `/future-map`
 - `/tests`
 - `/errors`
 - `/analytics`

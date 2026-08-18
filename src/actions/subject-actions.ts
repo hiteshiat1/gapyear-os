@@ -9,8 +9,12 @@ export async function saveSubjectAction(formData: FormData) {
     id: formData.get("id")?.toString() || undefined,
     name: formData.get("name"),
     shortName: formData.get("shortName"),
+    examBoard: formData.get("examBoard"),
+    specificationCode: formData.get("specificationCode"),
+    specificationOptions: formData.get("specificationOptions"),
     achievedGrade: formData.get("achievedGrade"),
     targetGrade: formData.get("targetGrade"),
+    schoolPredictedGrade: formData.get("schoolPredictedGrade"),
     active: formData.get("active") === "on",
   });
 

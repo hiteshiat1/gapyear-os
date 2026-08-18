@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ensureProfile } from "@/actions/auth-actions";
+import { getStudentOnboardingProfile } from "@/lib/repositories/onboarding";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -11,6 +12,10 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     await supabase?.auth.exchangeCodeForSession(code);
     await ensureProfile();
+    const onboarding = await getStudentOnboardingProfile().catch(() => null);
+    if (!onboarding?.onboardingCompleted && next === "/") {
+      return NextResponse.redirect(`${origin}/onboarding`);
+    }
   }
 
   return NextResponse.redirect(`${origin}${next}`);

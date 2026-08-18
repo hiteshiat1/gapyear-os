@@ -6,6 +6,7 @@ import { getDailyPlan } from "@/lib/repositories/daily-plans";
 import { getExamErrors } from "@/lib/repositories/errors";
 import { getExams } from "@/lib/repositories/exams";
 import { getProjects } from "@/lib/repositories/projects";
+import { getStudentOnboardingProfile, onboardingSummary } from "@/lib/repositories/onboarding";
 import { firstName, getCurrentProfile } from "@/lib/repositories/profiles";
 import { getSyllabusTopicsWithProgress } from "@/lib/repositories/syllabus";
 import { getSubjects, getTopics } from "@/lib/repositories/subjects";
@@ -13,7 +14,7 @@ import { examPercentage, marksFromBoundary, readinessScore, repeatedWeaknesses }
 import type { Subject } from "@/types/domain";
 
 export default async function Dashboard() {
-  const [subjects, topics, dailyPlan, exams, errors, projects, syllabusTopics] = await Promise.all([
+  const [subjects, topics, dailyPlan, exams, errors, projects, syllabusTopics, onboarding] = await Promise.all([
     getSubjects(),
     getTopics(),
     getDailyPlan(),
@@ -21,6 +22,7 @@ export default async function Dashboard() {
     getExamErrors(),
     getProjects(),
     getSyllabusTopicsWithProgress().catch(() => []),
+    getStudentOnboardingProfile().catch(() => null),
   ]);
   const profile = await getCurrentProfile();
   const name = firstName(profile);
@@ -46,8 +48,8 @@ export default async function Dashboard() {
     <AppShell>
       <PageHeader
         eyebrow="Today"
-        title="Gap Year OS"
-        description={`${name}'s focused daily operating system for academic recovery, engineering evidence, startup learning, and portfolio outcomes.`}
+        title="ALevels.io"
+        description={`${name}'s personal A-Level plan across syllabus coverage, daily study, assessments, error analysis, and evidence.`}
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -61,9 +63,29 @@ export default async function Dashboard() {
           <Stat label="Study streak" value="Calculated after sessions" detail="Requires persisted study session history" />
         </Card>
         <Card>
-          <Stat label="Objective" value="A*AA" detail="Maths, Further Maths, Physics" />
+          <Stat
+            label="Onboarding"
+            value={onboarding?.onboardingCompleted ? "Complete" : "Resume"}
+            detail={onboardingSummary(onboarding, subjects)}
+          />
         </Card>
       </div>
+
+      {!onboarding?.onboardingCompleted ? (
+        <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="font-medium text-amber-950">Finish student setup</p>
+              <p className="mt-1 text-sm text-amber-800">
+                Add stage, subjects, boards, grades, availability, and known assessment dates to generate a starting plan.
+              </p>
+            </div>
+            <Link href="/onboarding" className="rounded-md bg-amber-900 px-3 py-2 text-sm font-medium text-white">
+              Open onboarding
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card>

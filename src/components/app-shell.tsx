@@ -4,6 +4,7 @@ import {
   BookOpen,
   CalendarDays,
   ClipboardCheck,
+  Compass,
   GraduationCap,
   Home,
   Library,
@@ -11,47 +12,77 @@ import {
   LogOut,
   Map,
   NotebookPen,
+  CircleUserRound,
   Settings,
   Target,
   TestTube2,
+  UserCheck,
   Users,
   Wrench,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { signOutAction } from "@/actions/auth-actions";
+import { getStudentOnboardingProfile } from "@/lib/repositories/onboarding";
 import { getCurrentProfile } from "@/lib/repositories/profiles";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: Home },
+  { href: "/", label: "Home", icon: Home },
   { href: "/today", label: "Today", icon: CalendarDays },
+  { href: "/onboarding", label: "Onboarding", icon: UserCheck },
+  { href: "/explore", label: "Explore", icon: Compass },
+  { href: "/universities", label: "Universities", icon: GraduationCap },
+  { href: "/careers", label: "Careers", icon: Users },
+  { href: "/future-map", label: "Future Map", icon: Map },
   { href: "/subjects", label: "Subjects", icon: GraduationCap },
-  { href: "/tests", label: "Tests & Mocks", icon: TestTube2 },
+  { href: "/tests", label: "Assessments", icon: TestTube2 },
   { href: "/errors", label: "Error Log", icon: ClipboardCheck },
   { href: "/tutoring", label: "Tutoring", icon: Users },
   { href: "/journal", label: "Journal", icon: NotebookPen },
-  { href: "/startup", label: "Startup Exp", icon: Lightbulb },
-  { href: "/projects", label: "Projects", icon: Wrench },
-  { href: "/events", label: "Conf/Events", icon: Map },
+  { href: "/startup", label: "Evidence: Work", icon: Lightbulb },
+  { href: "/projects", label: "Evidence: Projects", icon: Wrench },
+  { href: "/events", label: "Evidence: Events", icon: Map },
   { href: "/library", label: "Library", icon: Library },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/goals", label: "Goals", icon: Target },
   { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/settings/profile", label: "Profile", icon: CircleUserRound },
   { href: "/settings/syllabus", label: "Syllabus", icon: BookOpen },
   { href: "/settings/import", label: "Import", icon: ClipboardCheck },
-  { href: "/logout", label: "Logout", icon: LogOut },
 ];
 
 export async function AppShell({ children }: { children: ReactNode }) {
-  const profile = await getCurrentProfile();
+  const [profile, studentProfile] = await Promise.all([
+    getCurrentProfile(),
+    getStudentOnboardingProfile().catch(() => null),
+  ]);
   const displayName = profile?.fullName ?? "Student";
+  const tone = studentProfile?.visualTone ?? "masculine";
+  const theme = tone === "feminine" ? feminineTheme : masculineTheme;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
-      <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-slate-200 bg-white px-4 py-5 lg:block">
-        <Link href="/" className="block px-2">
-          <p className="text-lg font-semibold tracking-tight">Gap Year OS</p>
-          <p className="mt-1 text-sm text-slate-500">{displayName}</p>
-          <p className="mt-1 text-xs text-slate-400">Learn. Test. Analyse. Demonstrate.</p>
-        </Link>
+    <div className={`min-h-screen ${theme.view} text-slate-950`}>
+      <aside className={`fixed inset-y-0 left-0 hidden w-72 border-r px-4 py-5 lg:block ${theme.menu}`}>
+        <div className="flex items-start gap-3 px-2">
+          <Link href="/settings/profile" aria-label="Profile management" className={`mt-0.5 rounded-md p-2 ${theme.icon}`}>
+            <CircleUserRound className="h-5 w-5" />
+          </Link>
+          <Link href="/" className="block min-w-0">
+            <p className="text-lg font-semibold tracking-tight">ALevels.io</p>
+            <p className={`mt-1 truncate text-sm ${theme.muted}`}>{displayName}</p>
+            <p className={`mt-1 text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
+          </Link>
+        </div>
+        <div className="mt-4 flex gap-2 px-2">
+          <Link href="/settings/profile" className={`rounded-md px-3 py-1.5 text-xs font-medium ${theme.softButton}`}>
+            Profile
+          </Link>
+          <form action={signOutAction}>
+            <button className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium ${theme.softButton}`}>
+              <LogOut className="h-3.5 w-3.5" />
+              Sign out
+            </button>
+          </form>
+        </div>
         <nav className="mt-7 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -59,7 +90,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${theme.nav}`}
               >
                 <Icon className="h-4 w-4" />
                 {item.label}
@@ -69,15 +100,27 @@ export async function AppShell({ children }: { children: ReactNode }) {
         </nav>
       </aside>
       <div className="lg:pl-72">
-        <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
-          <p className="text-base font-semibold">Gap Year OS</p>
-          <p className="text-sm text-slate-500">{displayName}</p>
+        <header className={`sticky top-0 z-10 border-b px-4 py-3 backdrop-blur lg:hidden ${theme.menu}`}>
+          <div className="flex items-start gap-3">
+            <Link href="/settings/profile" aria-label="Profile management" className={`rounded-md p-2 ${theme.icon}`}>
+              <CircleUserRound className="h-5 w-5" />
+            </Link>
+            <div className="min-w-0">
+              <p className="text-base font-semibold">ALevels.io</p>
+              <p className={`truncate text-sm ${theme.muted}`}>{displayName}</p>
+            </div>
+            <form action={signOutAction} className="ml-auto">
+              <button aria-label="Sign out" className={`rounded-md p-2 ${theme.icon}`}>
+                <LogOut className="h-5 w-5" />
+              </button>
+            </form>
+          </div>
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
             {navItems.slice(0, 8).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="whitespace-nowrap rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700"
+                className={`whitespace-nowrap rounded-md border px-3 py-1.5 text-sm ${theme.mobileNav}`}
               >
                 {item.label}
               </Link>
@@ -89,3 +132,25 @@ export async function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+const masculineTheme = {
+  menu: "border-slate-800 bg-slate-950 text-white",
+  view: "bg-slate-100",
+  muted: "text-slate-300",
+  subtle: "text-slate-400",
+  icon: "text-slate-100 hover:bg-slate-800",
+  nav: "text-slate-300 hover:bg-slate-800 hover:text-white",
+  softButton: "bg-slate-800 text-slate-100 hover:bg-slate-700",
+  mobileNav: "border-slate-700 bg-slate-900 text-slate-100",
+};
+
+const feminineTheme = {
+  menu: "border-rose-200 bg-rose-100 text-rose-950",
+  view: "bg-orange-50",
+  muted: "text-rose-700",
+  subtle: "text-rose-500",
+  icon: "text-rose-900 hover:bg-rose-200",
+  nav: "text-rose-800 hover:bg-rose-200 hover:text-rose-950",
+  softButton: "bg-white/75 text-rose-900 hover:bg-white",
+  mobileNav: "border-rose-200 bg-white/70 text-rose-900",
+};

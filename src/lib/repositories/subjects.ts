@@ -9,8 +9,12 @@ function mockSubject(subject: (typeof mockSubjects)[number]): Subject {
     id: subject.id,
     name: subject.name,
     shortName: subject.shortName,
+    examBoard: null,
+    specificationCode: null,
+    specificationOptions: null,
     achievedGrade: subject.currentGrade,
     targetGrade: subject.targetGrade,
+    schoolPredictedGrade: null,
     estimatedGrade: subject.estimatedGrade,
     latestMockGrade: subject.latestMockGrade,
     syllabusCompletion: subject.syllabusCompletion,
@@ -84,8 +88,12 @@ export async function getTopics() {
 export async function createSubject(input: {
   name: string;
   shortName: string;
+  examBoard?: string | null;
+  specificationCode?: string | null;
+  specificationOptions?: string | null;
   achievedGrade?: string | null;
   targetGrade?: string | null;
+  schoolPredictedGrade?: string | null;
   active: boolean;
 }) {
   const supabase = await getSupabaseForRead();
@@ -101,8 +109,12 @@ export async function createSubject(input: {
     updated_by: user.id,
     name: input.name,
     short_name: input.shortName,
+    exam_board: input.examBoard ?? null,
+    specification_code: input.specificationCode ?? null,
+    specification_options: input.specificationOptions ?? null,
     achieved_grade: input.achievedGrade ?? null,
     target_grade: input.targetGrade ?? null,
+    school_predicted_grade: input.schoolPredictedGrade ?? null,
     active: input.active,
   });
 
@@ -116,8 +128,12 @@ export async function updateSubject(
   input: {
     name: string;
     shortName: string;
+    examBoard?: string | null;
+    specificationCode?: string | null;
+    specificationOptions?: string | null;
     achievedGrade?: string | null;
     targetGrade?: string | null;
+    schoolPredictedGrade?: string | null;
     active: boolean;
   },
 ) {
@@ -134,8 +150,12 @@ export async function updateSubject(
       updated_by: user.id,
       name: input.name,
       short_name: input.shortName,
+      exam_board: input.examBoard ?? null,
+      specification_code: input.specificationCode ?? null,
+      specification_options: input.specificationOptions ?? null,
       achieved_grade: input.achievedGrade ?? null,
       target_grade: input.targetGrade ?? null,
+      school_predicted_grade: input.schoolPredictedGrade ?? null,
       active: input.active,
     })
     .eq("id", id)

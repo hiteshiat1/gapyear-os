@@ -2,8 +2,12 @@ export type Subject = {
   id: string;
   name: string;
   shortName: string;
+  examBoard: string | null;
+  specificationCode: string | null;
+  specificationOptions: string | null;
   achievedGrade: string | null;
   targetGrade: string | null;
+  schoolPredictedGrade: string | null;
   estimatedGrade: string | null;
   latestMockGrade: string | null;
   syllabusCompletion: number;
@@ -407,4 +411,85 @@ export type WeeklySnapshot = {
   examMetrics: Record<string, unknown>;
   errorMetrics: Record<string, unknown>;
   projectMetrics: Record<string, unknown>;
+};
+
+export type InterestProfile = {
+  id: string;
+  broadInterests: string[];
+  freeText: string | null;
+};
+
+export type CourseInterest = {
+  id: string;
+  courseName: string;
+  interestLevel: number;
+  reason: string | null;
+};
+
+export type UniversityChoiceStatus =
+  | "exploring"
+  | "shortlist"
+  | "aspirational"
+  | "realistic"
+  | "safety"
+  | "applied"
+  | "offer"
+  | "rejected"
+  | "withdrawn";
+
+export type UniversityChoice = {
+  id: string;
+  university: string;
+  course: string;
+  entryYear: string | null;
+  typicalEntryRequirements: string | null;
+  requiredSubjects: string | null;
+  contextualRequirements: string | null;
+  admissionsTests: string | null;
+  interestLevel: number;
+  status: UniversityChoiceStatus;
+  notes: string | null;
+  sourceUrl: string | null;
+  lastChecked: string | null;
+};
+
+export type CareerFamily = {
+  id: string;
+  name: string;
+  description: string | null;
+  exampleRoles: string[];
+  skills: string[];
+  typicalDegreeRoutes: string[];
+};
+
+export type StudentCareerInterest = {
+  id: string;
+  careerFamilyId: string;
+  interestLevel: number;
+  reason: string | null;
+  status: string;
+};
+
+export type EvidenceLink = {
+  id: string;
+  sourceType: string;
+  sourceId: string | null;
+  courseInterestId: string | null;
+  universityChoiceId: string | null;
+  careerFamilyId: string | null;
+  skills: string[];
+  ucasCategory: string | null;
+  reflectionStrength: string | null;
+};
+
+export type FutureMapNode = {
+  id: string;
+  nodeType: string;
+  label: string;
+  detail: string | null;
+};
+
+export type FutureMapColumn = {
+  title: string;
+  nodes: FutureMapNode[];
 };

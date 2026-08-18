@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Gap Year OS",
+  title: "ALevels.io",
   description:
-    "A private academic, engineering, startup, and portfolio operating system for a structured gap year.",
+    "A private A-Level planning, assessment, evidence, and progress platform for Year 12, Year 13, and resit students.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

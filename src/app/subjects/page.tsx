@@ -29,9 +29,15 @@ export default async function SubjectsPage() {
               <input name="name" placeholder="Mathematics" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
               <input name="shortName" placeholder="Maths" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
               <div className="grid grid-cols-2 gap-3">
+                <input name="examBoard" placeholder="Exam board" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
+                <input name="specificationCode" placeholder="Specification" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
+              </div>
+              <input name="specificationOptions" placeholder="Options, if relevant" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+              <div className="grid grid-cols-2 gap-3">
                 <input name="achievedGrade" placeholder="B" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
                 <input name="targetGrade" placeholder="A*" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
               </div>
+              <input name="schoolPredictedGrade" placeholder="School / UCAS predicted grade" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
               <label className="flex items-center gap-2 text-sm">
                 <input name="active" type="checkbox" defaultChecked />
                 Active resit subject
@@ -101,6 +107,8 @@ export default async function SubjectsPage() {
                 </div>
                 <div className="mt-4">
                   <DataRow label="Estimated grade" value={subject.estimatedGrade ?? "Needs data"} />
+                  <DataRow label="School prediction" value={subject.schoolPredictedGrade ?? "Not set"} />
+                  <DataRow label="Board / spec" value={`${subject.examBoard ?? "Not set"} · ${subject.specificationCode ?? "Not set"}`} />
                   <DataRow label="Latest mock grade" value={subject.latestMockGrade ?? "No mock"} />
                   <DataRow label="Readiness estimate" value={`${readiness}%`} />
                   <DataRow label="Topics" value={subjectTopics.length} />
@@ -137,7 +145,10 @@ export default async function SubjectsPage() {
           }) : (
             <Card className="lg:col-span-2">
               <p className="font-medium">No subjects yet.</p>
-              <p className="mt-1 text-sm text-slate-500">Run the seed SQL or add the first subject using the form.</p>
+              <p className="mt-1 text-sm text-slate-500">
+                Call the seed function with your Auth user UUID, load the syllabus from Settings, or add the first subject using
+                the form.
+              </p>
             </Card>
           )}
         </div>
