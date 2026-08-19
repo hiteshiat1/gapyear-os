@@ -11,13 +11,15 @@ const topItems: NavItem[] = [
   { href: "/today", label: "Today", icon: "CalendarDays" },
 ];
 
-const nextStepsSection = {
-  title: "Next Steps",
+const aLevelsSection = {
+  title: "A Levels",
   items: [
-    { href: "/explore", label: "Explore", icon: "Compass" },
-    { href: "/careers", label: "Careers", icon: "Users" },
-    { href: "/universities", label: "Universities", icon: "GraduationCap" },
-    { href: "/future-map", label: "Future Map", icon: "Map" },
+    { href: "/subjects", label: "Subjects", icon: "GraduationCap" },
+    { href: "/settings/reference-data", label: "Reference Data", icon: "Library" },
+    { href: "/settings/syllabus", label: "Syllabus", icon: "BookOpen" },
+    { href: "/library", label: "Library", icon: "Library" },
+    { href: "/onboarding", label: "Onboarding", icon: "UserCheck" },
+    { href: "/tutoring", label: "Tutoring", icon: "Users" },
   ],
 } satisfies { title: string; items: NavItem[] };
 
@@ -31,33 +33,32 @@ const progressSection = {
   ],
 } satisfies { title: string; items: NavItem[] };
 
-const aLevelsSection = {
-  title: "A Levels",
+const extraCurricularsSection = {
+  title: "Extra Curriculars",
   items: [
-    { href: "/subjects", label: "Subjects", icon: "GraduationCap" },
-    { href: "/settings/reference-data", label: "Reference Data", icon: "Library" },
-    { href: "/settings/syllabus", label: "Syllabus", icon: "BookOpen" },
-    { href: "/library", label: "Library", icon: "Library" },
-    { href: "/onboarding", label: "Onboarding", icon: "UserCheck" },
+    { href: "/journal", label: "Journal", icon: "NotebookPen" },
+    { href: "/startup", label: "Evidence: Work", icon: "Lightbulb" },
+    { href: "/projects", label: "Evidence: Projects", icon: "Wrench" },
+    { href: "/events", label: "Evidence: Events", icon: "Map" },
   ],
 } satisfies { title: string; items: NavItem[] };
 
-const otherItems: NavItem[] = [
-  { href: "/tutoring", label: "Tutoring", icon: "Users" },
-  { href: "/journal", label: "Journal", icon: "NotebookPen" },
-  { href: "/startup", label: "Evidence: Work", icon: "Lightbulb" },
-  { href: "/projects", label: "Evidence: Projects", icon: "Wrench" },
-  { href: "/events", label: "Evidence: Events", icon: "Map" },
-  { href: "/settings", label: "Settings", icon: "Settings" },
-  { href: "/settings/profile", label: "Profile", icon: "CircleUserRound" },
-  { href: "/settings/import", label: "Import", icon: "ClipboardCheck" },
-];
+const nextStepsSection = {
+  title: "Next Steps",
+  items: [
+    { href: "/explore", label: "Explore", icon: "Compass" },
+    { href: "/careers", label: "Careers", icon: "Users" },
+    { href: "/universities", label: "Universities", icon: "GraduationCap" },
+    { href: "/future-map", label: "Future Map", icon: "Map" },
+  ],
+} satisfies { title: string; items: NavItem[] };
 
 const mobileNavItems: NavItem[] = [
   ...topItems,
-  ...nextStepsSection.items,
-  ...progressSection.items,
   ...aLevelsSection.items,
+  ...progressSection.items,
+  ...extraCurricularsSection.items,
+  ...nextStepsSection.items,
 ];
 
 export async function AppShell({ children }: { children: ReactNode }) {
@@ -73,10 +74,10 @@ export async function AppShell({ children }: { children: ReactNode }) {
 
   const entries: NavEntry[] = [
     ...topItems.map((item) => ({ kind: "item" as const, item })),
-    { kind: "section" as const, section: nextStepsSection },
-    { kind: "section" as const, section: progressSection },
     { kind: "section" as const, section: aLevelsSection },
-    ...otherItems.map((item) => ({ kind: "item" as const, item })),
+    { kind: "section" as const, section: progressSection },
+    { kind: "section" as const, section: extraCurricularsSection },
+    { kind: "section" as const, section: nextStepsSection },
     ...(isAdmin ? [{ kind: "item" as const, item: { href: "/admin", label: "Admin", icon: "ShieldCheck" as const } }] : []),
   ];
 
