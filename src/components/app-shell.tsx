@@ -14,6 +14,7 @@ import {
   NotebookPen,
   CircleUserRound,
   Settings,
+  ShieldCheck,
   Target,
   TestTube2,
   UserCheck,
@@ -60,6 +61,9 @@ export async function AppShell({ children }: { children: ReactNode }) {
   const initial = displayName.trim().charAt(0).toUpperCase() || "S";
   const tone = studentProfile?.visualTone ?? "masculine";
   const theme = tone === "feminine" ? feminineTheme : masculineTheme;
+  const items = profile?.role === "admin"
+    ? [...navItems, { href: "/admin", label: "Admin", icon: ShieldCheck }]
+    : navItems;
 
   return (
     <div className={`min-h-screen ${theme.view} text-slate-950`}>
@@ -90,7 +94,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
           </Link>
         </div>
         <nav className="mt-10 space-y-1">
-          {navItems.map((item) => {
+          {items.map((item) => {
             const Icon = item.icon;
             return (
               <Link

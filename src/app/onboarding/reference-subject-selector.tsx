@@ -42,6 +42,7 @@ export function ReferenceSubjectSelector({
   const targetGrades = grades.filter((grade) => grade.isTargetSelectable);
 
   const selectedSubjects = new Set(rows.map((row) => row.subjectId).filter(Boolean));
+  const offeredSubjectIds = new Set(boards.map((board) => board.subjectId));
 
   return (
     <div className="mt-4 space-y-4">
@@ -80,50 +81,63 @@ export function ReferenceSubjectSelector({
               ))}
 
             <div className="grid gap-3 md:grid-cols-3">
-              <select
-                value={row.subjectId}
-                onChange={(event) => updateRow(index, { subjectId: event.target.value, boardId: "", specificationId: "", selectedOptionIds: [] })}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-              >
-                <option value="">Choose subject</option>
-                {subjects.map((item) => (
-                  <option key={item.id} value={item.id} disabled={selectedSubjects.has(item.id) && item.id !== row.subjectId}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={row.boardId}
-                onChange={(event) => {
-                  const nextBoardId = event.target.value;
-                  const matchingSpecs = specifications.filter(
-                    (spec) => spec.subjectId === row.subjectId && spec.examBoardId === nextBoardId,
-                  );
-                  updateRow(index, {
-                    boardId: nextBoardId,
-                    specificationId: matchingSpecs.length === 1 ? matchingSpecs[0].id : "",
-                    selectedOptionIds: [],
-                  });
-                }}
-                disabled={!row.subjectId}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-              >
-                <option value="">Choose board</option>
-                {availableBoards.map((board) => (
-                  <option key={board.id} value={board.id}>{board.name}</option>
-                ))}
-              </select>
-              <select
-                value={row.specificationId}
-                onChange={(event) => updateRow(index, { specificationId: event.target.value, selectedOptionIds: [] })}
-                disabled={!row.boardId}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-              >
-                <option value="">Choose specification</option>
-                {availableSpecs.map((spec) => (
-                  <option key={spec.id} value={spec.id}>{spec.specificationCode} · {spec.specificationName}</option>
-                ))}
-              </select>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Subject</label>
+                <select
+                  value={row.subjectId}
+                  onChange={(event) => updateRow(index, { subjectId: event.target.value, boardId: "", specificationId: "", selectedOptionIds: [] })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Choose subject</option>
+                  {subjects.map((item) => {
+                    const offered = offeredSubjectIds.has(item.id);
+                    const takenByAnotherRow = selectedSubjects.has(item.id) && item.id !== row.subjectId;
+                    return (
+                      <option key={item.id} value={item.id} disabled={!offered || takenByAnotherRow}>
+                        {item.name}{!offered ? " (Coming soon)" : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Exam board</label>
+                <select
+                  value={row.boardId}
+                  onChange={(event) => {
+                    const nextBoardId = event.target.value;
+                    const matchingSpecs = specifications.filter(
+                      (spec) => spec.subjectId === row.subjectId && spec.examBoardId === nextBoardId,
+                    );
+                    updateRow(index, {
+                      boardId: nextBoardId,
+                      specificationId: matchingSpecs.length === 1 ? matchingSpecs[0].id : "",
+                      selectedOptionIds: [],
+                    });
+                  }}
+                  disabled={!row.subjectId}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Choose board</option>
+                  {availableBoards.map((board) => (
+                    <option key={board.id} value={board.id}>{board.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Specification</label>
+                <select
+                  value={row.specificationId}
+                  onChange={(event) => updateRow(index, { specificationId: event.target.value, selectedOptionIds: [] })}
+                  disabled={!row.boardId}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Choose specification</option>
+                  {availableSpecs.map((spec) => (
+                    <option key={spec.id} value={spec.id}>{spec.specificationCode} · {spec.specificationName}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {duplicateSubject ? <p className="mt-2 text-sm text-red-600">This subject is already selected.</p> : null}
@@ -239,18 +253,21 @@ function GradeSelect({
 }) {
   const options = useMemo(() => [...extraOptions, ...grades.map((grade) => grade.grade)], [extraOptions, grades]);
   return (
-    <select
-      name={name}
-      value={value}
-      aria-label={label}
-      onChange={(event) => onChange(event.target.value)}
-      className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-    >
-      <option value="">{label}</option>
-      {options.map((option) => (
-        <option key={option} value={option}>{option}</option>
-      ))}
-    </select>
+    <div>
+      <label className="mb-1 block text-xs font-medium text-slate-500">{label}</label>
+      <select
+        name={name}
+        value={value}
+        aria-label={label}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+      >
+        <option value="">Select</option>
+        {options.map((option) => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+      </select>
+    </div>
   );
 }
 
