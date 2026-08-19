@@ -25,31 +25,60 @@ import type { ReactNode } from "react";
 import { signOutAction } from "@/actions/auth-actions";
 import { getStudentOnboardingProfile } from "@/lib/repositories/onboarding";
 import { getCurrentProfile } from "@/lib/repositories/profiles";
+import { AppNav, type NavEntry, type NavItem } from "./app-nav";
 
-const navItems = [
+const topItems: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/today", label: "Today", icon: CalendarDays },
-  { href: "/onboarding", label: "Onboarding", icon: UserCheck },
-  { href: "/explore", label: "Explore", icon: Compass },
-  { href: "/universities", label: "Universities", icon: GraduationCap },
-  { href: "/careers", label: "Careers", icon: Users },
-  { href: "/future-map", label: "Future Map", icon: Map },
-  { href: "/subjects", label: "Subjects", icon: GraduationCap },
-  { href: "/tests", label: "Assessments", icon: TestTube2 },
-  { href: "/errors", label: "Error Log", icon: ClipboardCheck },
+];
+
+const nextStepsSection = {
+  title: "Next Steps",
+  items: [
+    { href: "/explore", label: "Explore", icon: Compass },
+    { href: "/careers", label: "Careers", icon: Users },
+    { href: "/universities", label: "Universities", icon: GraduationCap },
+    { href: "/future-map", label: "Future Map", icon: Map },
+  ],
+};
+
+const progressSection = {
+  title: "Progress",
+  items: [
+    { href: "/tests", label: "Assessments", icon: TestTube2 },
+    { href: "/goals", label: "Goals", icon: Target },
+    { href: "/errors", label: "Error Log", icon: ClipboardCheck },
+    { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  ],
+};
+
+const aLevelsSection = {
+  title: "A Levels",
+  items: [
+    { href: "/subjects", label: "Subjects", icon: GraduationCap },
+    { href: "/settings/reference-data", label: "Reference Data", icon: Library },
+    { href: "/settings/syllabus", label: "Syllabus", icon: BookOpen },
+    { href: "/library", label: "Library", icon: Library },
+    { href: "/onboarding", label: "Onboarding", icon: UserCheck },
+  ],
+};
+
+const otherItems: NavItem[] = [
   { href: "/tutoring", label: "Tutoring", icon: Users },
   { href: "/journal", label: "Journal", icon: NotebookPen },
   { href: "/startup", label: "Evidence: Work", icon: Lightbulb },
   { href: "/projects", label: "Evidence: Projects", icon: Wrench },
   { href: "/events", label: "Evidence: Events", icon: Map },
-  { href: "/library", label: "Library", icon: Library },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/goals", label: "Goals", icon: Target },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/settings/profile", label: "Profile", icon: CircleUserRound },
-  { href: "/settings/reference-data", label: "Reference Data", icon: Library },
-  { href: "/settings/syllabus", label: "Syllabus", icon: BookOpen },
   { href: "/settings/import", label: "Import", icon: ClipboardCheck },
+];
+
+const mobileNavItems: NavItem[] = [
+  ...topItems,
+  ...nextStepsSection.items,
+  ...progressSection.items,
+  ...aLevelsSection.items,
 ];
 
 export async function AppShell({ children }: { children: ReactNode }) {
@@ -61,9 +90,20 @@ export async function AppShell({ children }: { children: ReactNode }) {
   const initial = displayName.trim().charAt(0).toUpperCase() || "S";
   const tone = studentProfile?.visualTone ?? "masculine";
   const theme = tone === "feminine" ? feminineTheme : masculineTheme;
-  const items = profile?.role === "admin"
-    ? [...navItems, { href: "/admin", label: "Admin", icon: ShieldCheck }]
-    : navItems;
+  const isAdmin = profile?.role === "admin";
+
+  const entries: NavEntry[] = [
+    ...topItems.map((item) => ({ kind: "item" as const, item })),
+    { kind: "section" as const, section: nextStepsSection },
+    { kind: "section" as const, section: progressSection },
+    { kind: "section" as const, section: aLevelsSection },
+    ...otherItems.map((item) => ({ kind: "item" as const, item })),
+    ...(isAdmin ? [{ kind: "item" as const, item: { href: "/admin", label: "Admin", icon: ShieldCheck } }] : []),
+  ];
+
+  const mobileItems: NavItem[] = isAdmin
+    ? [...mobileNavItems, { href: "/admin", label: "Admin", icon: ShieldCheck }]
+    : mobileNavItems;
 
   return (
     <div className={`min-h-screen ${theme.view} text-slate-950`}>
@@ -93,21 +133,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
             <p className={`mt-1 text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
           </Link>
         </div>
-        <nav className="mt-10 space-y-1">
-          {items.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${theme.nav}`}
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <AppNav entries={entries} navClassName={theme.nav} sectionTitleClassName={theme.sectionTitle} />
       </aside>
       <div className="lg:pl-72">
         <header className={`sticky top-0 z-10 border-b px-4 py-3 backdrop-blur lg:hidden ${theme.menu}`}>
@@ -137,7 +163,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-            {navItems.slice(0, 8).map((item) => (
+            {mobileItems.slice(0, 8).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -162,6 +188,7 @@ const masculineTheme = {
   avatar: "bg-slate-800 text-slate-100 hover:bg-slate-700",
   icon: "text-slate-100 hover:bg-slate-800",
   nav: "text-slate-300 hover:bg-slate-800 hover:text-white",
+  sectionTitle: "text-slate-500 hover:bg-slate-800 hover:text-slate-200",
   softButton: "bg-slate-800 text-slate-100 hover:bg-slate-700",
   mobileNav: "border-slate-700 bg-slate-900 text-slate-100",
 };
@@ -174,6 +201,7 @@ const feminineTheme = {
   avatar: "bg-white text-rose-900 hover:bg-rose-50",
   icon: "text-rose-900 hover:bg-rose-200",
   nav: "text-rose-800 hover:bg-rose-200 hover:text-rose-950",
+  sectionTitle: "text-rose-500 hover:bg-rose-200 hover:text-rose-700",
   softButton: "bg-white/75 text-rose-900 hover:bg-white",
   mobileNav: "border-rose-200 bg-white/70 text-rose-900",
 };

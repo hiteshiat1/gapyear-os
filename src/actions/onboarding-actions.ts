@@ -47,7 +47,8 @@ export async function saveOnboardingAction(formData: FormData) {
     weekendDefaultMinutes: optionalNumber(formData.get("weekendDefaultMinutes")),
     lighterDays,
   });
-  await seedAllSyllabuses();
+  const selectedSubjectNames = subjects.filter((subject) => subject.referenceSubjectId).map((subject) => subject.name);
+  await seedAllSyllabuses(selectedSubjectNames);
   await generateWeeklyTasksFromDate(todayIso());
 
   revalidatePath("/");

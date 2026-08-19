@@ -61,7 +61,7 @@ type TopicDiagnosticRow = {
   notes: string | null;
 };
 
-export async function seedAllSyllabuses() {
+export async function seedAllSyllabuses(subjectNames?: string[]) {
   const supabase = await getSupabaseForRead();
   const user = await requireUser();
 
@@ -70,8 +70,14 @@ export async function seedAllSyllabuses() {
   }
 
   const result: Array<{ subject: string; topics: number }> = [];
+  const allowedNames = subjectNames?.length
+    ? new Set(subjectNames.map((name) => name.trim().toLowerCase()))
+    : null;
+  const definitions = allowedNames
+    ? syllabusDefinitions.filter((definition) => allowedNames.has(definition.subjectName.trim().toLowerCase()))
+    : syllabusDefinitions;
 
-  for (const definition of syllabusDefinitions) {
+  for (const definition of definitions) {
     const subject = await ensureSubject(definition);
     const topicRows = definition.topics.map((topic) => ({
       subject_id: subject.id,
