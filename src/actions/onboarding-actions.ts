@@ -10,7 +10,6 @@ import {
   upsertStudentOnboardingProfile,
   type StudentStage,
 } from "@/lib/repositories/onboarding";
-import { seedReferenceData } from "@/lib/repositories/reference-data";
 import {
   getBoardOfferings,
   getGradeOptions,
@@ -40,7 +39,6 @@ export async function saveOnboardingAction(formData: FormData) {
     onboardingCompleted: true,
   });
 
-  await seedReferenceData();
   const subjects = [0, 1, 2, 3, 4].map((index) => subjectFromForm(formData, index));
   await validateOnboardingSubjects(subjects);
   await saveCanonicalOnboardingSubjects(subjects);
