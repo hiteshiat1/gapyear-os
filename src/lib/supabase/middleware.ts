@@ -4,6 +4,7 @@ import { isSupabaseConfigured, supabasePublishableKey, supabaseUrl } from "./con
 import type { Database } from "@/types/database";
 
 const PUBLIC_PATHS = ["/login", "/auth/callback", "/portfolio"];
+const ONBOARDING_EXEMPT_PATHS = ["/onboarding", "/settings", "/admin", "/logout", "/api"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
@@ -42,6 +43,26 @@ export async function updateSession(request: NextRequest) {
     url.pathname = "/login";
     url.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(url);
+  }
+
+  if (user && !isPublic) {
+    const isExempt = ONBOARDING_EXEMPT_PATHS.some(
+      (path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`),
+    );
+
+    if (!isExempt) {
+      const { data } = await supabase
+        .from("student_profiles")
+        .select("onboarding_completed")
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      if (!data?.onboarding_completed) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/onboarding";
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return response;
