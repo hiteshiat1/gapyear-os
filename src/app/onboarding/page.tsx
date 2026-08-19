@@ -36,6 +36,16 @@ export default async function OnboardingPage() {
 
       <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
         <Card>
+          {!referenceSubjects.length ? (
+            <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <form action={seedReferenceDataAction}>
+                <button type="submit" className="rounded-md bg-amber-900 px-4 py-2 text-sm font-medium text-white">
+                  Load A Level Subjects (for our default subjects)
+                </button>
+              </form>
+              <p className="mt-2 text-xs text-amber-700">Other subjects coming soon.</p>
+            </div>
+          ) : null}
           <form action={saveOnboardingAction} className="space-y-8">
             <section>
               <div className="flex items-center justify-between gap-4">
@@ -80,16 +90,7 @@ export default async function OnboardingPage() {
                   grades={grades}
                 />
               ) : (
-                <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-                  <p className="text-sm text-amber-800">
-                    Canonical subject, board, specification, and grade reference data has not been loaded yet.
-                  </p>
-                  <form action={seedReferenceDataAction} className="mt-3">
-                    <button className="rounded-md bg-amber-900 px-4 py-2 text-sm font-medium text-white">
-                      Load reference data
-                    </button>
-                  </form>
-                </div>
+                <p className="mt-4 text-sm text-slate-500">Load subjects above to continue.</p>
               )}
             </section>
 
@@ -184,7 +185,7 @@ export default async function OnboardingPage() {
               </div>
             </section>
 
-            <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white">
+            <button type="submit" className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white">
               Save onboarding and generate plan
             </button>
           </form>
