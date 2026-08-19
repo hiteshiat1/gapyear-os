@@ -1,26 +1,5 @@
 import Link from "next/link";
-import {
-  BarChart3,
-  BookOpen,
-  CalendarDays,
-  ClipboardCheck,
-  Compass,
-  GraduationCap,
-  Home,
-  Library,
-  Lightbulb,
-  LogOut,
-  Map,
-  NotebookPen,
-  CircleUserRound,
-  Settings,
-  ShieldCheck,
-  Target,
-  TestTube2,
-  UserCheck,
-  Users,
-  Wrench,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { signOutAction } from "@/actions/auth-actions";
 import { getStudentOnboardingProfile } from "@/lib/repositories/onboarding";
@@ -28,50 +7,50 @@ import { getCurrentProfile } from "@/lib/repositories/profiles";
 import { AppNav, type NavEntry, type NavItem } from "./app-nav";
 
 const topItems: NavItem[] = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/today", label: "Today", icon: CalendarDays },
+  { href: "/", label: "Home", icon: "Home" },
+  { href: "/today", label: "Today", icon: "CalendarDays" },
 ];
 
 const nextStepsSection = {
   title: "Next Steps",
   items: [
-    { href: "/explore", label: "Explore", icon: Compass },
-    { href: "/careers", label: "Careers", icon: Users },
-    { href: "/universities", label: "Universities", icon: GraduationCap },
-    { href: "/future-map", label: "Future Map", icon: Map },
+    { href: "/explore", label: "Explore", icon: "Compass" },
+    { href: "/careers", label: "Careers", icon: "Users" },
+    { href: "/universities", label: "Universities", icon: "GraduationCap" },
+    { href: "/future-map", label: "Future Map", icon: "Map" },
   ],
-};
+} satisfies { title: string; items: NavItem[] };
 
 const progressSection = {
   title: "Progress",
   items: [
-    { href: "/tests", label: "Assessments", icon: TestTube2 },
-    { href: "/goals", label: "Goals", icon: Target },
-    { href: "/errors", label: "Error Log", icon: ClipboardCheck },
-    { href: "/analytics", label: "Analytics", icon: BarChart3 },
+    { href: "/tests", label: "Assessments", icon: "TestTube2" },
+    { href: "/goals", label: "Goals", icon: "Target" },
+    { href: "/errors", label: "Error Log", icon: "ClipboardCheck" },
+    { href: "/analytics", label: "Analytics", icon: "BarChart3" },
   ],
-};
+} satisfies { title: string; items: NavItem[] };
 
 const aLevelsSection = {
   title: "A Levels",
   items: [
-    { href: "/subjects", label: "Subjects", icon: GraduationCap },
-    { href: "/settings/reference-data", label: "Reference Data", icon: Library },
-    { href: "/settings/syllabus", label: "Syllabus", icon: BookOpen },
-    { href: "/library", label: "Library", icon: Library },
-    { href: "/onboarding", label: "Onboarding", icon: UserCheck },
+    { href: "/subjects", label: "Subjects", icon: "GraduationCap" },
+    { href: "/settings/reference-data", label: "Reference Data", icon: "Library" },
+    { href: "/settings/syllabus", label: "Syllabus", icon: "BookOpen" },
+    { href: "/library", label: "Library", icon: "Library" },
+    { href: "/onboarding", label: "Onboarding", icon: "UserCheck" },
   ],
-};
+} satisfies { title: string; items: NavItem[] };
 
 const otherItems: NavItem[] = [
-  { href: "/tutoring", label: "Tutoring", icon: Users },
-  { href: "/journal", label: "Journal", icon: NotebookPen },
-  { href: "/startup", label: "Evidence: Work", icon: Lightbulb },
-  { href: "/projects", label: "Evidence: Projects", icon: Wrench },
-  { href: "/events", label: "Evidence: Events", icon: Map },
-  { href: "/settings", label: "Settings", icon: Settings },
-  { href: "/settings/profile", label: "Profile", icon: CircleUserRound },
-  { href: "/settings/import", label: "Import", icon: ClipboardCheck },
+  { href: "/tutoring", label: "Tutoring", icon: "Users" },
+  { href: "/journal", label: "Journal", icon: "NotebookPen" },
+  { href: "/startup", label: "Evidence: Work", icon: "Lightbulb" },
+  { href: "/projects", label: "Evidence: Projects", icon: "Wrench" },
+  { href: "/events", label: "Evidence: Events", icon: "Map" },
+  { href: "/settings", label: "Settings", icon: "Settings" },
+  { href: "/settings/profile", label: "Profile", icon: "CircleUserRound" },
+  { href: "/settings/import", label: "Import", icon: "ClipboardCheck" },
 ];
 
 const mobileNavItems: NavItem[] = [
@@ -98,11 +77,11 @@ export async function AppShell({ children }: { children: ReactNode }) {
     { kind: "section" as const, section: progressSection },
     { kind: "section" as const, section: aLevelsSection },
     ...otherItems.map((item) => ({ kind: "item" as const, item })),
-    ...(isAdmin ? [{ kind: "item" as const, item: { href: "/admin", label: "Admin", icon: ShieldCheck } }] : []),
+    ...(isAdmin ? [{ kind: "item" as const, item: { href: "/admin", label: "Admin", icon: "ShieldCheck" as const } }] : []),
   ];
 
   const mobileItems: NavItem[] = isAdmin
-    ? [...mobileNavItems, { href: "/admin", label: "Admin", icon: ShieldCheck }]
+    ? [...mobileNavItems, { href: "/admin", label: "Admin", icon: "ShieldCheck" as const }]
     : mobileNavItems;
 
   return (

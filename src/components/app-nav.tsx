@@ -2,15 +2,58 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ComponentType } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import {
+  BarChart3,
+  BookOpen,
+  CalendarDays,
+  ChevronDown,
+  CircleUserRound,
+  ClipboardCheck,
+  Compass,
+  GraduationCap,
+  Home,
+  Library,
+  Lightbulb,
+  Map,
+  NotebookPen,
+  Settings,
+  ShieldCheck,
+  Target,
+  TestTube2,
+  UserCheck,
+  Users,
+  Wrench,
+} from "lucide-react";
 
-export type NavIcon = ComponentType<{ className?: string }>;
+const ICONS = {
+  BarChart3,
+  BookOpen,
+  CalendarDays,
+  CircleUserRound,
+  ClipboardCheck,
+  Compass,
+  GraduationCap,
+  Home,
+  Library,
+  Lightbulb,
+  Map,
+  NotebookPen,
+  Settings,
+  ShieldCheck,
+  Target,
+  TestTube2,
+  UserCheck,
+  Users,
+  Wrench,
+} as const;
+
+export type NavIconName = keyof typeof ICONS;
 
 export type NavItem = {
   href: string;
   label: string;
-  icon: NavIcon;
+  icon: NavIconName;
 };
 
 export type NavSection = {
@@ -78,7 +121,7 @@ export function AppNav({
 }
 
 function NavLink({ item, active, className }: { item: NavItem; active: boolean; className: string }) {
-  const Icon = item.icon;
+  const Icon = ICONS[item.icon];
   return (
     <Link
       href={item.href}
