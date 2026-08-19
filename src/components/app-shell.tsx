@@ -64,30 +64,30 @@ export async function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className={`min-h-screen ${theme.view} text-slate-950`}>
       <aside className={`fixed inset-y-0 left-0 hidden w-72 border-r px-4 py-5 lg:block ${theme.menu}`}>
-        <div className="group relative px-2">
-          <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3 px-2">
+          <div className="group relative">
             <button
               aria-label="Profile menu"
               className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${theme.avatar}`}
             >
               {initial}
             </button>
-            <Link href="/" className="block min-w-0">
-              <p className="text-lg font-semibold tracking-tight">ALevels.io</p>
-              <p className={`mt-1 text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
-            </Link>
+            <div className="pointer-events-none absolute left-0 top-11 z-20 flex translate-y-1 flex-col gap-1 whitespace-nowrap opacity-0 transition group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+              <Link href="/settings/profile" className={`rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
+                Profile
+              </Link>
+              <form action={signOutAction}>
+                <button className={`inline-flex w-full items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign out
+                </button>
+              </form>
+            </div>
           </div>
-          <div className="pointer-events-none absolute left-2 top-12 z-20 flex translate-y-1 gap-2 opacity-0 transition group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
-            <Link href="/settings/profile" className={`rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
-              Profile
-            </Link>
-            <form action={signOutAction}>
-              <button className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
-                <LogOut className="h-3.5 w-3.5" />
-                Sign out
-              </button>
-            </form>
-          </div>
+          <Link href="/" className="block min-w-0">
+            <p className="text-lg font-semibold tracking-tight">ALevels.io</p>
+            <p className={`mt-1 text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
+          </Link>
         </div>
         <nav className="mt-10 space-y-1">
           {navItems.map((item) => {
@@ -107,27 +107,29 @@ export async function AppShell({ children }: { children: ReactNode }) {
       </aside>
       <div className="lg:pl-72">
         <header className={`sticky top-0 z-10 border-b px-4 py-3 backdrop-blur lg:hidden ${theme.menu}`}>
-          <div className="group relative flex items-start gap-3">
-            <button
-              aria-label="Profile menu"
-              className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${theme.avatar}`}
-            >
-              {initial}
-            </button>
+          <div className="flex items-center gap-3">
+            <div className="group relative">
+              <button
+                aria-label="Profile menu"
+                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${theme.avatar}`}
+              >
+                {initial}
+              </button>
+              <div className="pointer-events-none absolute left-0 top-11 z-20 flex translate-y-1 flex-col gap-1 whitespace-nowrap opacity-0 transition group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                <Link href="/settings/profile" className={`rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
+                  Profile
+                </Link>
+                <form action={signOutAction}>
+                  <button className={`inline-flex w-full items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
+                    <LogOut className="h-3.5 w-3.5" />
+                    Sign out
+                  </button>
+                </form>
+              </div>
+            </div>
             <div className="min-w-0">
               <p className="text-base font-semibold">ALevels.io</p>
               <p className={`text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
-            </div>
-            <div className="pointer-events-none absolute left-0 top-12 z-20 flex translate-y-1 gap-2 opacity-0 transition group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
-              <Link href="/settings/profile" className={`rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
-                Profile
-              </Link>
-              <form action={signOutAction}>
-                <button className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium shadow-sm ${theme.softButton}`}>
-                  <LogOut className="h-3.5 w-3.5" />
-                  Sign out
-                </button>
-              </form>
             </div>
           </div>
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
