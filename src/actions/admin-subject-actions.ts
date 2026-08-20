@@ -9,8 +9,12 @@ export async function enableSubjectAction(formData: FormData) {
   const subjectId = String(formData.get("subjectId") ?? "");
   if (!subjectId) throw new Error("Missing subject.");
 
-  await provisionSubject(subjectId);
-  await setSubjectSelectable(subjectId, true);
+  const result = await provisionSubject(subjectId);
+  if (!result.selectable) {
+    throw new Error(
+      `Could not enable ${result.subjectName}: neither AQA nor Edexcel provisioned successfully. Check /admin/subjects for details.`,
+    );
+  }
   revalidatePath("/admin/subjects");
   revalidatePath("/admin/syllabuses");
   revalidatePath("/admin");
