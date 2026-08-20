@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { examPercentage, lastAverage, marksFromBoundary, repeatedWeaknesses } from "@/lib/analytics/calculations";
+import { examPercentage, lastAverage, marksFromBoundary, progressLabelFromEvidence, repeatedWeaknesses } from "@/lib/analytics/calculations";
 import type { Exam, ExamError } from "@/types/domain";
 
 function exam(id: string, percentage: number): Exam {
@@ -73,5 +73,13 @@ describe("analytics calculations", () => {
       error("4", "Integration", true),
     ]);
     expect(weaknesses[0]).toMatchObject({ topic: "Electric Fields", count: 3 });
+  });
+
+  it("maps evidence into qualitative progress labels", () => {
+    expect(progressLabelFromEvidence({ topicCount: 0, percent: null })).toBe("Not assessed");
+    expect(progressLabelFromEvidence({ topicCount: 1, percent: 20 })).toBe("Early evidence");
+    expect(progressLabelFromEvidence({ topicCount: 5, percent: 20 })).toBe("Needs attention");
+    expect(progressLabelFromEvidence({ topicCount: 5, percent: 55 })).toBe("Developing");
+    expect(progressLabelFromEvidence({ topicCount: 5, percent: 85 })).toBe("On track");
   });
 });

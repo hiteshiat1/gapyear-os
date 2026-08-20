@@ -7,7 +7,7 @@ import { getCurrentProfile } from "@/lib/repositories/profiles";
 import { AppNav, type NavEntry, type NavItem } from "./app-nav";
 
 const topItems: NavItem[] = [
-  { href: "/", label: "Home", icon: "Home" },
+  { href: "/dashboard", label: "Dashboard", icon: "Home" },
   { href: "/today", label: "Today", icon: "CalendarDays" },
 ];
 
@@ -118,7 +118,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
               </form>
             </div>
           </div>
-          <Link href="/" className="block min-w-0">
+          <Link href="/dashboard" className="block min-w-0">
             <p className="text-lg font-semibold tracking-tight">ALevels.io</p>
             <p className={`mt-1 text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
           </Link>

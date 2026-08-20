@@ -81,3 +81,13 @@ export function readinessScore(input: {
 
   return Math.round(recentAverage * 0.5 + mastery * 0.2 + errorResolution * 0.15 + consistency * 0.15);
 }
+
+export type ProgressLabel = "Not assessed" | "Early evidence" | "Developing" | "On track" | "Needs attention";
+
+export function progressLabelFromEvidence(input: { topicCount: number; percent: number | null }): ProgressLabel {
+  if (input.topicCount === 0 || input.percent === null) return "Not assessed";
+  if (input.topicCount < 3) return "Early evidence";
+  if (input.percent < 40) return "Needs attention";
+  if (input.percent < 70) return "Developing";
+  return "On track";
+}
