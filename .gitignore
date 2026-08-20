@@ -56,3 +56,6 @@ scaffold/
 *.local
 .vercel
 .env*
+
+# Worktrees
+.worktrees/
