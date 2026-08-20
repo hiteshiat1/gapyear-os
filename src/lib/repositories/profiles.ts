@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient, getAuthenticatedUser } from "@/lib/supabase/server";
 import { requireUser } from "./common";
 
@@ -49,6 +50,14 @@ export function firstName(profile: CurrentProfile | null) {
 export async function isCurrentUserAdmin() {
   const profile = await getCurrentProfile();
   return profile?.role === "admin";
+}
+
+export async function requireAdmin(): Promise<CurrentProfile> {
+  const profile = await getCurrentProfile();
+  if (profile?.role !== "admin") {
+    redirect("/dashboard");
+  }
+  return profile;
 }
 
 export async function listAllProfiles(): Promise<AdminProfileRow[]> {
