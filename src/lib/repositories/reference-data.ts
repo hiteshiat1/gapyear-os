@@ -396,62 +396,129 @@ export async function provisionSubject(subjectId: string): Promise<ProvisionSubj
   const boards = await getExamBoards();
   const boardByCode = new Map(boards.map((board) => [board.code, board]));
 
+  // Post-write outcomes, per board. Starts as a copy of the pre-computed plan
+  // but is overridden to "error" below if that board's DB writes throw.
+  // This is what actually gets persisted to subject_provisioning_status and
+  // returned to callers, since the pre-computed plan is only a prediction —
+  // it does not reflect whether the writes for that board actually succeeded.
+  const outcomes: ProvisioningPlanEntry[] = [];
+
   for (const entry of plan) {
     const board = boardByCode.get(entry.boardCode);
     if (!board) continue;
 
-    if (entry.status !== "not_offered") {
-      const spec = referenceSpecifications.find(
-        (item) => item.subjectSlug === subjectRow.slug && item.boardCode === entry.boardCode,
-      );
-      if (spec) {
-        await supabase.from("board_subject_offerings").upsert(
-          {
-            exam_board_id: board.id,
-            subject_id: subjectRow.id,
-            qualification_level: "A Level",
-            available: true,
-            coming_soon: entry.status !== "ready",
-            topic_support_status: entry.status === "ready" ? "full" : "coming_soon",
-            official_source_url: spec.officialSourceUrl,
-            verified_at: new Date().toISOString().slice(0, 10),
-          },
-          { onConflict: "exam_board_id,subject_id,qualification_level" },
-        ).throwOnError();
+    let outcome: ProvisioningPlanEntry = entry;
 
-        await supabase.from("specifications").upsert(
-          {
-            exam_board_id: board.id,
-            subject_id: subjectRow.id,
-            qualification_type: "A Level",
-            specification_code: spec.specificationCode,
-            specification_name: spec.specificationName,
-            version_name: spec.versionName ?? null,
-            teaching_from: spec.teachingFrom ?? null,
-            first_exam: spec.firstExam ?? null,
-            active: true,
-            topic_support_status: entry.status === "ready" ? "full" : "coming_soon",
-            official_source_url: spec.officialSourceUrl,
-            verified_at: new Date().toISOString().slice(0, 10),
-          },
-          { onConflict: "exam_board_id,specification_code" },
-        ).throwOnError();
+    try {
+      if (entry.status !== "not_offered") {
+        const spec = referenceSpecifications.find(
+          (item) => item.subjectSlug === subjectRow.slug && item.boardCode === entry.boardCode,
+        );
+        if (spec) {
+          await supabase.from("board_subject_offerings").upsert(
+            {
+              exam_board_id: board.id,
+              subject_id: subjectRow.id,
+              qualification_level: "A Level",
+              available: true,
+              coming_soon: entry.status !== "ready",
+              topic_support_status: entry.status === "ready" ? "full" : "coming_soon",
+              official_source_url: spec.officialSourceUrl,
+              verified_at: new Date().toISOString().slice(0, 10),
+            },
+            { onConflict: "exam_board_id,subject_id,qualification_level" },
+          ).throwOnError();
+
+          const { data: persistedSpec, error: specError } = await supabase
+            .from("specifications")
+            .upsert(
+              {
+                exam_board_id: board.id,
+                subject_id: subjectRow.id,
+                qualification_type: "A Level",
+                specification_code: spec.specificationCode,
+                specification_name: spec.specificationName,
+                version_name: spec.versionName ?? null,
+                teaching_from: spec.teachingFrom ?? null,
+                first_exam: spec.firstExam ?? null,
+                active: true,
+                topic_support_status: entry.status === "ready" ? "full" : "coming_soon",
+                official_source_url: spec.officialSourceUrl,
+                verified_at: new Date().toISOString().slice(0, 10),
+              },
+              { onConflict: "exam_board_id,specification_code" },
+            )
+            .select("id")
+            .single();
+          if (specError) throw new Error(specError.message);
+
+          if (spec.options?.length) {
+            await supabase.from("specification_options").upsert(
+              spec.options.map((option) => ({
+                specification_id: persistedSpec.id,
+                code: option.code,
+                name: option.name,
+                option_group: option.optionGroup ?? null,
+                required_or_optional: option.requiredOrOptional,
+                min_select: option.minSelect,
+                max_select: option.maxSelect,
+                sort_order: option.sortOrder,
+                active: true,
+              })),
+              { onConflict: "specification_id,code" },
+            ).throwOnError();
+          }
+
+          if (spec.papers?.length) {
+            await supabase.from("papers").upsert(
+              spec.papers.map((paper) => ({
+                specification_id: persistedSpec.id,
+                code: paper.code,
+                name: paper.name,
+                component_type: paper.componentType,
+                weighting: paper.weighting ?? null,
+                duration_minutes: paper.durationMinutes ?? null,
+                max_marks: paper.maxMarks ?? null,
+                sort_order: paper.sortOrder,
+                active: true,
+              })),
+              { onConflict: "specification_id,code" },
+            ).throwOnError();
+          }
+        }
       }
+    } catch (err) {
+      // Partial failure isolation: an error writing this board's data must
+      // not abort provisioning of the other board. Record this board's
+      // outcome as "error" and continue the loop.
+      const message = err instanceof Error ? err.message : String(err);
+      outcome = {
+        ...entry,
+        status: "error",
+        message,
+      };
     }
 
-    await supabase.from("subject_provisioning_status").upsert(
+    outcomes.push(outcome);
+
+    const { error: statusError } = await supabase.from("subject_provisioning_status").upsert(
       {
         subject_id: subjectRow.id,
-        board_code: entry.boardCode,
-        status: entry.status,
-        message: entry.message,
+        board_code: outcome.boardCode,
+        status: outcome.status,
+        message: outcome.message,
         provisioned_at: new Date().toISOString(),
       },
       { onConflict: "subject_id,board_code" },
     );
+    if (statusError) throw new Error(statusError.message);
   }
 
-  const selectable = isSubjectSelectableFromPlan(plan);
+  // Selectability must reflect what actually got written, not the pre-write
+  // prediction: a board that threw during its DB writes did not successfully
+  // provision, so it should not count as "ready"/"coming_soon" here even if
+  // the plan predicted it would.
+  const selectable = isSubjectSelectableFromPlan(outcomes);
 
   await supabase.from("a_level_subjects").update({ student_selectable: selectable }).eq("id", subjectRow.id);
 
@@ -460,10 +527,10 @@ export async function provisionSubject(subjectId: string): Promise<ProvisionSubj
     action: "admin_provisioned_syllabus",
     entity_type: "a_level_subjects",
     entity_id: subjectRow.id,
-    new_value: { plan, selectable },
+    new_value: { plan: outcomes, selectable },
   });
 
-  return { subjectId: subjectRow.id, subjectName: subjectRow.name, plan, selectable };
+  return { subjectId: subjectRow.id, subjectName: subjectRow.name, plan: outcomes, selectable };
 }
 
 export async function setSubjectSelectable(subjectId: string, selectable: boolean) {
