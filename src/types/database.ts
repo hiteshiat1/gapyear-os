@@ -398,6 +398,7 @@ export type Database = {
         category: string;
         description: string | null;
         active: boolean;
+        student_selectable: boolean;
         sort_order: number;
         topic_support_status: string;
         source_name: string | null;
@@ -655,6 +656,25 @@ export type Database = {
         metadata: Json | null;
         changed_at: string;
         changed_by: string | null;
+      }>;
+      subject_provisioning_status: Table<{
+        id: string;
+        subject_id: string;
+        board_code: string;
+        status: string;
+        specification_id: string | null;
+        message: string | null;
+        provisioned_at: string;
+      }>;
+      audit_log: Table<{
+        id: string;
+        actor_id: string;
+        action: string;
+        entity_type: string;
+        entity_id: string | null;
+        old_value: Json | null;
+        new_value: Json | null;
+        created_at: string;
       }>;
     };
     Views: Record<string, never>;

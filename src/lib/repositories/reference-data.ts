@@ -4,7 +4,9 @@ import {
   referenceSpecifications,
   referenceSubjects,
 } from "@/data/reference/catalogue";
+import { syllabusDefinitions } from "@/data/syllabuses";
 import { getSupabaseForRead, requireUser } from "./common";
+import { resolveProvisioningPlan, isSubjectSelectableFromPlan, type ProvisioningPlanEntry } from "./provisioning";
 
 export type ReferenceSubjectOption = {
   id: string;
@@ -368,4 +370,177 @@ export async function getReferenceDiagnostics() {
     subjectsWithNoVerifiedBoardOffering: subjects.filter((subject) => !subjectsWithOfferings.has(subject.id)).length,
     duplicateSpecificationCodes,
   };
+}
+
+export type ProvisionSubjectResult = {
+  subjectId: string;
+  subjectName: string;
+  plan: ProvisioningPlanEntry[];
+  selectable: boolean;
+};
+
+export async function provisionSubject(subjectId: string): Promise<ProvisionSubjectResult> {
+  const supabase = await getSupabaseForRead();
+  const user = await requireUser();
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const { data: subjectRow, error: subjectError } = await supabase
+    .from("a_level_subjects")
+    .select("id,slug,name")
+    .eq("id", subjectId)
+    .single();
+  if (subjectError) throw new Error(subjectError.message);
+
+  const plan = resolveProvisioningPlan(subjectRow.slug, referenceSpecifications, syllabusDefinitions);
+
+  const boards = await getExamBoards();
+  const boardByCode = new Map(boards.map((board) => [board.code, board]));
+
+  for (const entry of plan) {
+    const board = boardByCode.get(entry.boardCode);
+    if (!board) continue;
+
+    if (entry.status !== "not_offered") {
+      const spec = referenceSpecifications.find(
+        (item) => item.subjectSlug === subjectRow.slug && item.boardCode === entry.boardCode,
+      );
+      if (spec) {
+        await supabase.from("board_subject_offerings").upsert(
+          {
+            exam_board_id: board.id,
+            subject_id: subjectRow.id,
+            qualification_level: "A Level",
+            available: true,
+            coming_soon: entry.status !== "ready",
+            topic_support_status: entry.status === "ready" ? "full" : "coming_soon",
+            official_source_url: spec.officialSourceUrl,
+            verified_at: new Date().toISOString().slice(0, 10),
+          },
+          { onConflict: "exam_board_id,subject_id,qualification_level" },
+        ).throwOnError();
+
+        await supabase.from("specifications").upsert(
+          {
+            exam_board_id: board.id,
+            subject_id: subjectRow.id,
+            qualification_type: "A Level",
+            specification_code: spec.specificationCode,
+            specification_name: spec.specificationName,
+            version_name: spec.versionName ?? null,
+            teaching_from: spec.teachingFrom ?? null,
+            first_exam: spec.firstExam ?? null,
+            active: true,
+            topic_support_status: entry.status === "ready" ? "full" : "coming_soon",
+            official_source_url: spec.officialSourceUrl,
+            verified_at: new Date().toISOString().slice(0, 10),
+          },
+          { onConflict: "exam_board_id,specification_code" },
+        ).throwOnError();
+      }
+    }
+
+    await supabase.from("subject_provisioning_status").upsert(
+      {
+        subject_id: subjectRow.id,
+        board_code: entry.boardCode,
+        status: entry.status,
+        message: entry.message,
+        provisioned_at: new Date().toISOString(),
+      },
+      { onConflict: "subject_id,board_code" },
+    );
+  }
+
+  const selectable = isSubjectSelectableFromPlan(plan);
+
+  await supabase.from("a_level_subjects").update({ student_selectable: selectable }).eq("id", subjectRow.id);
+
+  await supabase.from("audit_log").insert({
+    actor_id: user.id,
+    action: "admin_provisioned_syllabus",
+    entity_type: "a_level_subjects",
+    entity_id: subjectRow.id,
+    new_value: { plan, selectable },
+  });
+
+  return { subjectId: subjectRow.id, subjectName: subjectRow.name, plan, selectable };
+}
+
+export async function setSubjectSelectable(subjectId: string, selectable: boolean) {
+  const supabase = await getSupabaseForRead();
+  const user = await requireUser();
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const { data: before } = await supabase
+    .from("a_level_subjects")
+    .select("student_selectable")
+    .eq("id", subjectId)
+    .maybeSingle();
+
+  const { error } = await supabase
+    .from("a_level_subjects")
+    .update({ student_selectable: selectable })
+    .eq("id", subjectId);
+  if (error) throw new Error(error.message);
+
+  await supabase.from("audit_log").insert({
+    actor_id: user.id,
+    action: selectable ? "admin_enabled_subject" : "admin_disabled_subject",
+    entity_type: "a_level_subjects",
+    entity_id: subjectId,
+    old_value: { student_selectable: before?.student_selectable ?? null },
+    new_value: { student_selectable: selectable },
+  });
+}
+
+export type SubjectAdminRow = {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  active: boolean;
+  studentSelectable: boolean;
+  provisioning: ProvisioningPlanEntry[];
+};
+
+export async function getSubjectsForAdmin(): Promise<SubjectAdminRow[]> {
+  const supabase = await getSupabaseForRead();
+  if (!supabase) return [];
+
+  const { data: subjects, error } = await supabase
+    .from("a_level_subjects")
+    .select("id,slug,name,category,active,student_selectable")
+    .order("sort_order")
+    .order("name");
+  if (error) {
+    console.error("getSubjectsForAdmin failed", error.message);
+    return [];
+  }
+
+  const { data: statusRows } = await supabase
+    .from("subject_provisioning_status")
+    .select("subject_id,board_code,status,message,specification_id");
+
+  const statusBySubject = new Map<string, ProvisioningPlanEntry[]>();
+  for (const row of statusRows ?? []) {
+    const list = statusBySubject.get(row.subject_id) ?? [];
+    list.push({
+      boardCode: row.board_code as "AQA" | "EDEXCEL",
+      status: row.status as ProvisioningPlanEntry["status"],
+      specificationCode: null,
+      specificationName: null,
+      message: row.message,
+    });
+    statusBySubject.set(row.subject_id, list);
+  }
+
+  return subjects.map((subject) => ({
+    id: subject.id,
+    slug: subject.slug,
+    name: subject.name,
+    category: subject.category,
+    active: subject.active,
+    studentSelectable: subject.student_selectable,
+    provisioning: statusBySubject.get(subject.id) ?? [],
+  }));
 }
