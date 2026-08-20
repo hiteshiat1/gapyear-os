@@ -1,158 +1,77 @@
-import { createTopicAction, deleteSubjectAction, deleteTopicAction, saveSubjectAction } from "@/actions/subject-actions";
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { Badge, Card, DataRow, PageHeader, ProgressBar } from "@/components/ui";
-import { readinessScore } from "@/lib/analytics/calculations";
-import { getExamErrors } from "@/lib/repositories/errors";
-import { getExams } from "@/lib/repositories/exams";
-import { getSubjects, getTopics } from "@/lib/repositories/subjects";
+import { Badge, Card, PageHeader, ProgressBar } from "@/components/ui";
+import { getMyOnboardingSubjects } from "@/lib/repositories/onboarding";
 
 export default async function SubjectsPage() {
-  const [subjects, topics, exams, errors] = await Promise.all([
-    getSubjects(),
-    getTopics(),
-    getExams(),
-    getExamErrors(),
-  ]);
+  const subjects = await getMyOnboardingSubjects();
 
   return (
     <AppShell>
       <PageHeader
-        eyebrow="Academic Recovery"
+        eyebrow="A Levels"
         title="Subjects"
-        description="Create and manage active resit subjects, retained subjects, and topic readiness."
+        description="The subjects, boards, and grades you set during onboarding. Update this list from Onboarding."
       />
-      <div className="grid gap-6 xl:grid-cols-[1fr_2fr]">
-        <div className="space-y-6">
-          <Card>
-            <h2 className="text-lg font-semibold">Add Subject</h2>
-            <form action={saveSubjectAction} className="mt-4 space-y-3">
-              <input name="name" placeholder="Mathematics" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              <input name="shortName" placeholder="Maths" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              <div className="grid grid-cols-2 gap-3">
-                <input name="examBoard" placeholder="Exam board" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-                <input name="specificationCode" placeholder="Specification" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              </div>
-              <input name="specificationOptions" placeholder="Options, if relevant" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              <div className="grid grid-cols-2 gap-3">
-                <input name="achievedGrade" placeholder="B" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-                <input name="targetGrade" placeholder="A*" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              </div>
-              <input name="schoolPredictedGrade" placeholder="School / UCAS predicted grade" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              <label className="flex items-center gap-2 text-sm">
-                <input name="active" type="checkbox" defaultChecked />
-                Active resit subject
-              </label>
-              <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white">Save subject</button>
-            </form>
-          </Card>
-          <Card>
-            <h2 className="text-lg font-semibold">Add Topic</h2>
-            <form action={createTopicAction} className="mt-4 space-y-3">
-              <select name="subjectId" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
-                <option value="">Choose subject</option>
-                {subjects.map((subject) => (
-                  <option key={subject.id} value={subject.id}>{subject.name}</option>
-                ))}
-              </select>
-              <input name="name" placeholder="Electric Fields" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              <div className="grid grid-cols-2 gap-3">
-                <select name="status" defaultValue="Not Started" className="rounded-md border border-slate-300 px-3 py-2 text-sm">
-                  {["Not Started", "Learning", "Revised", "Practice Required", "Exam Ready", "Mastered"].map((status) => (
-                    <option key={status}>{status}</option>
-                  ))}
-                </select>
-                <select name="priority" defaultValue="Medium" className="rounded-md border border-slate-300 px-3 py-2 text-sm">
-                  {["Low", "Medium", "High", "Critical"].map((priority) => (
-                    <option key={priority}>{priority}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <input name="confidence" type="number" min="1" max="5" placeholder="Confidence" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-                <input name="accuracy" type="number" min="0" max="100" placeholder="Accuracy %" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              </div>
-              <textarea name="notes" placeholder="Notes" className="min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white">Save topic</button>
-            </form>
-          </Card>
-        </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {subjects.length ? subjects.map((subject) => {
-            const subjectTopics = topics.filter((topic) => topic.subjectId === subject.id);
-            const readiness = readinessScore({
-              subject,
-              topics: subjectTopics,
-              exams: exams.filter((exam) => exam.subjectId === subject.id),
-              errors: errors.filter((entry) => entry.subjectId === subject.id),
-              studySessions: [],
-            });
-            return (
-              <Card key={subject.id} className={!subject.active ? "opacity-70" : undefined}>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold">{subject.name}</h2>
-                    <p className="mt-1 text-sm text-slate-500">
-                      Achieved {subject.achievedGrade ?? "Unset"} · Target {subject.targetGrade ?? "Unset"}
-                    </p>
-                  </div>
-                  <Badge tone={subject.active ? "blue" : "slate"}>{subject.active ? "Active" : "Retained"}</Badge>
-                </div>
-                <div className="mt-5">
-                  <div className="mb-2 flex justify-between text-sm">
-                    <span className="text-slate-500">Syllabus completion</span>
-                    <span className="font-medium">{subject.syllabusCompletion}%</span>
-                  </div>
-                  <ProgressBar value={subject.syllabusCompletion} />
-                </div>
-                <div className="mt-4">
-                  <DataRow label="Estimated grade" value={subject.estimatedGrade ?? "Needs data"} />
-                  <DataRow label="School prediction" value={subject.schoolPredictedGrade ?? "Not set"} />
-                  <DataRow label="Board / spec" value={`${subject.examBoard ?? "Not set"} · ${subject.specificationCode ?? "Not set"}`} />
-                  <DataRow label="Latest mock grade" value={subject.latestMockGrade ?? "No mock"} />
-                  <DataRow label="Readiness estimate" value={`${readiness}%`} />
-                  <DataRow label="Topics" value={subjectTopics.length} />
-                </div>
-                <div className="mt-4 flex gap-2">
-                  <form action={deleteSubjectAction}>
-                    <input type="hidden" name="id" value={subject.id} />
-                    <button className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium">Archive</button>
-                  </form>
-                </div>
-                <div className="mt-5 grid gap-3">
-                  {subjectTopics.length ? subjectTopics.map((topic) => (
-                    <div key={topic.id} className="rounded-lg border border-slate-200 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="font-medium">{topic.name}</p>
-                        <Badge tone={topic.priority === "Critical" ? "red" : topic.priority === "High" ? "amber" : "slate"}>
-                          {topic.priority}
-                        </Badge>
-                      </div>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {topic.status} · confidence {topic.confidence ?? "-"}/5 · {topic.accuracy ?? "-"}% accuracy · {topic.errorCount} errors
+      <Card>
+        {subjects.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                  <th className="py-2 pr-4">Subject</th>
+                  <th className="py-2 pr-4">Board</th>
+                  <th className="py-2 pr-4">Self Grade</th>
+                  <th className="py-2 pr-4">School Grade</th>
+                  <th className="py-2 pr-4">Target Grade</th>
+                  <th className="py-2 pr-4">Progress</th>
+                </tr>
+              </thead>
+              <tbody>
+                {subjects.map((subject) => (
+                  <tr key={subject.id} className="border-b border-slate-100 last:border-0">
+                    <td className="py-3 pr-4">
+                      <p className="font-medium">{subject.subjectName}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {subject.specificationCode ?? "Spec not set"}
+                        {subject.confirmationStatus === "needs_confirmation" ? " · unconfirmed" : ""}
                       </p>
-                      <form action={deleteTopicAction} className="mt-2">
-                        <input type="hidden" name="id" value={topic.id} />
-                        <button className="text-xs font-medium text-slate-500">Archive topic</button>
-                      </form>
-                    </div>
-                  )) : (
-                    <p className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">No topics yet.</p>
-                  )}
-                </div>
-              </Card>
-            );
-          }) : (
-            <Card className="lg:col-span-2">
-              <p className="font-medium">No subjects yet.</p>
-              <p className="mt-1 text-sm text-slate-500">
-                Call the seed function with your Auth user UUID, load the syllabus from Settings, or add the first subject using
-                the form.
-              </p>
-            </Card>
-          )}
-        </div>
-      </div>
+                    </td>
+                    <td className="py-3 pr-4">{subject.boardName ?? "Not sure"}</td>
+                    <td className="py-3 pr-4">{subject.selfGrade ?? "Not set"}</td>
+                    <td className="py-3 pr-4">{subject.schoolPredictedGrade ?? "Not provided"}</td>
+                    <td className="py-3 pr-4">{subject.targetGrade ?? "Not set"}</td>
+                    <td className="py-3 pr-4">
+                      {subject.topicSupportStatus === "full" && subject.progressPercent != null ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-24">
+                            <ProgressBar value={subject.progressPercent} />
+                          </div>
+                          <span className="text-xs font-medium">{subject.progressPercent}%</span>
+                        </div>
+                      ) : (
+                        <Badge tone="amber">Coming soon</Badge>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center">
+            <p className="font-medium">No subjects selected yet.</p>
+            <p className="mt-1 text-sm text-slate-500">Complete onboarding to select your A-Level subjects.</p>
+            <Link
+              href="/onboarding"
+              className="mt-4 inline-block rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white"
+            >
+              Go to onboarding
+            </Link>
+          </div>
+        )}
+      </Card>
     </AppShell>
   );
 }

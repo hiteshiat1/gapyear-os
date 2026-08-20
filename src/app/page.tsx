@@ -129,7 +129,7 @@ export default async function Dashboard() {
           <div className="mt-4">
             <DataRow label="Next tutoring session" value="Add tutoring sessions" />
             <DataRow label="Next mock" value={nextMock ? `${nextMock.paper}` : "No mock scheduled"} />
-            <DataRow label="Next engineering action" value={nextProject?.status ?? "Add first project"} />
+            <DataRow label="Next project action" value={nextProject?.status ?? "Add first project"} />
             <DataRow label="Journal" value={<Badge tone={dailyPlan?.eveningReflection ? "green" : "amber"}>{dailyPlan?.eveningReflection ? "Completed" : "Not completed"}</Badge>} />
           </div>
           {nextMock && nextMock.cycleStatus !== "Complete" ? (

@@ -11,7 +11,7 @@ export default function LibraryPage() {
       />
       <Card>
         <div className="grid gap-3 md:grid-cols-3">
-          {["A-level resource", "Engineering article", "Startup lesson", "YouTube video", "Book", "GitHub repository"].map((item) => (
+          {["A-level resource", "Article", "Course", "YouTube video", "Book", "GitHub repository"].map((item) => (
             <div key={item} className="rounded-lg border border-slate-200 p-4 text-sm font-medium">
               {item}
             </div>

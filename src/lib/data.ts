@@ -261,9 +261,9 @@ export const dailyTasks: DailyTask[] = [
   {
     id: "d4",
     time: "16:30-17:15",
-    task: "Engineering project note",
-    category: "Engineering",
-    topic: "EV telemetry current sensor",
+    task: "Project note",
+    category: "Project",
+    topic: "Update project log",
     plannedHours: 0.75,
     actualHours: 0,
     status: "Planned",

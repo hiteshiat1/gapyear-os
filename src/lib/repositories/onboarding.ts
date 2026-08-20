@@ -266,6 +266,86 @@ export async function saveOnboardingSubjects(inputs: OnboardingSubjectInput[]) {
   }
 }
 
+export type OnboardingSelectedSubject = {
+  id: string;
+  subjectName: string;
+  boardName: string | null;
+  specificationCode: string | null;
+  specificationName: string | null;
+  selfGrade: string | null;
+  schoolPredictedGrade: string | null;
+  targetGrade: string | null;
+  confirmationStatus: "confirmed" | "needs_confirmation";
+  topicSupportStatus: "full" | "coming_soon" | "not_planned";
+  progressPercent: number | null;
+};
+
+export async function getMyOnboardingSubjects(): Promise<OnboardingSelectedSubject[]> {
+  const supabase = await getSupabaseForRead();
+  const user = await requireUser();
+
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("student_subjects")
+    .select(
+      "id,self_grade,school_predicted_grade,target_grade,specification_confirmation_status,topic_support_status,a_level_subjects(name),exam_boards(name),specifications(specification_code,specification_name)",
+    )
+    .eq("owner_id", user.id)
+    .eq("active", true)
+    .eq("is_deleted", false)
+    .order("created_at");
+
+  if (error) {
+    console.error("getMyOnboardingSubjects failed", error.message);
+    return [];
+  }
+
+  type Row = {
+    id: string;
+    self_grade: string | null;
+    school_predicted_grade: string | null;
+    target_grade: string | null;
+    specification_confirmation_status: "confirmed" | "needs_confirmation";
+    topic_support_status: "full" | "coming_soon" | "not_planned";
+    a_level_subjects: { name: string } | { name: string }[] | null;
+    exam_boards: { name: string } | { name: string }[] | null;
+    specifications: { specification_code: string; specification_name: string } | { specification_code: string; specification_name: string }[] | null;
+  };
+
+  const rows = (data ?? []) as Row[];
+  const legacySubjects = await getSubjects();
+  const progressBySubjectName = new Map(
+    legacySubjects.map((subject) => [subject.name.trim().toLowerCase(), subject.syllabusCompletion]),
+  );
+
+  return rows.map((row) => {
+    const subject = one(row.a_level_subjects);
+    const board = one(row.exam_boards);
+    const specification = one(row.specifications);
+    const subjectName = subject?.name ?? "Unknown subject";
+
+    return {
+      id: row.id,
+      subjectName,
+      boardName: board?.name ?? null,
+      specificationCode: specification?.specification_code ?? null,
+      specificationName: specification?.specification_name ?? null,
+      selfGrade: row.self_grade,
+      schoolPredictedGrade: row.school_predicted_grade,
+      targetGrade: row.target_grade,
+      confirmationStatus: row.specification_confirmation_status,
+      topicSupportStatus: row.topic_support_status,
+      progressPercent: progressBySubjectName.get(subjectName.trim().toLowerCase()) ?? null,
+    };
+  });
+}
+
+function one<T>(value: T | T[] | null): T | null {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
 export function onboardingSummary(profile: StudentOnboardingProfile | null, subjects: Subject[]) {
   if (!profile) return "Start onboarding";
   if (!profile.onboardingCompleted) return `Resume step ${profile.onboardingStep}`;

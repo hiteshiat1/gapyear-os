@@ -14,12 +14,11 @@ const topItems: NavItem[] = [
 const aLevelsSection = {
   title: "A Levels",
   items: [
-    { href: "/subjects", label: "Subjects", icon: "GraduationCap" },
-    { href: "/settings/reference-data", label: "Reference Data", icon: "Library" },
-    { href: "/settings/syllabus", label: "Syllabus", icon: "BookOpen" },
-    { href: "/library", label: "Library", icon: "Library" },
     { href: "/onboarding", label: "Onboarding", icon: "UserCheck" },
+    { href: "/subjects", label: "Subjects", icon: "GraduationCap" },
+    { href: "/settings/syllabus", label: "Syllabus", icon: "BookOpen" },
     { href: "/tutoring", label: "Tutoring", icon: "Users" },
+    { href: "/library", label: "Library", icon: "Library" },
   ],
 } satisfies { title: string; items: NavItem[] };
 

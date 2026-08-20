@@ -2,11 +2,10 @@ import { AppShell } from "@/components/app-shell";
 import { Card, PageHeader, ProgressBar } from "@/components/ui";
 
 const goals = [
-  ["Academic", "A*AA across Maths, Further Maths, Physics", 44],
-  ["Engineering", "Complete one substantial engineering project", 18],
-  ["Startup", "Complete meaningful EV/drone startup work", 10],
-  ["Exposure", "Attend relevant engineering and startup events", 8],
-  ["Portfolio", "Build documented evidence of the gap year", 22],
+  ["Academic", "Hit target grades across all A-Level subjects", 44],
+  ["Project", "Complete one substantial project", 18],
+  ["Exposure", "Attend relevant events and build connections", 8],
+  ["Portfolio", "Build documented evidence for UCAS", 22],
 ] as const;
 
 export default function GoalsPage() {

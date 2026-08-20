@@ -2,19 +2,27 @@ import Link from "next/link";
 import { seedSyllabusesAction, resetTopicProgressAction } from "@/actions/syllabus-actions";
 import { AppShell } from "@/components/app-shell";
 import { Badge, Card, DataRow, PageHeader, ProgressBar } from "@/components/ui";
+import { getMyOnboardingSubjects } from "@/lib/repositories/onboarding";
 import { getSyllabusLoadStatus, getSyllabusTopicsWithProgress } from "@/lib/repositories/syllabus";
 
 const statuses = ["Not Started", "Learning", "Revised", "Practice Required", "Exam Ready", "Mastered"];
 
 export default async function SyllabusSettingsPage() {
-  const [loadStatus, topics] = await Promise.all([getSyllabusLoadStatus(), getSyllabusTopicsWithProgress()]);
+  const [allLoadStatus, topics, selectedSubjects] = await Promise.all([
+    getSyllabusLoadStatus(),
+    getSyllabusTopicsWithProgress(),
+    getMyOnboardingSubjects(),
+  ]);
+  const selectedNames = new Set(selectedSubjects.map((subject) => subject.subjectName.trim().toLowerCase()));
+  const loadStatus = allLoadStatus.filter((status) => selectedNames.has(status.subjectName.trim().toLowerCase()));
   const bySubject = new Map(loadStatus.map((status) => [status.subjectId, status]));
   const subjectGroups = loadStatus.map((status) => ({
     ...status,
     topics: topics.filter((topic) => topic.topic.subjectId === status.subjectId),
   }));
+  const selectedSubjectIds = new Set(loadStatus.map((status) => status.subjectId).filter(Boolean));
   const highestPriority = topics
-    .filter((topic) => topic.topic.topicLevel !== "module")
+    .filter((topic) => topic.topic.topicLevel !== "module" && selectedSubjectIds.has(topic.topic.subjectId))
     .sort((a, b) => b.priorityScore - a.priorityScore)
     .slice(0, 12);
 

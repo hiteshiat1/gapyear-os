@@ -3,8 +3,7 @@ import { Badge, Card, PageHeader } from "@/components/ui";
 
 const prompts = [
   "Academic: what did I learn?",
-  "Engineering: what technical concept did I encounter?",
-  "Startup: what business or product lesson did I notice?",
+  "Evidence: what experience did I gain outside the classroom?",
   "Problem solving: what problem did I face and how did I approach it?",
   "Failure: what did not work?",
   "Reflection: what would I do differently?",
@@ -16,8 +15,8 @@ export default function JournalPage() {
     <AppShell>
       <PageHeader
         eyebrow="V2"
-        title="Gap-Year Journal"
-        description="A structured, fast journal for turning study, engineering, startup, travel, and networking experiences into evidence."
+        title="Journal"
+        description="A structured, fast journal for turning study, evidence, and reflection into a record you can draw on later."
       />
       <Card>
         <div className="grid gap-3 md:grid-cols-2">
@@ -29,7 +28,7 @@ export default function JournalPage() {
           ))}
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          {["Academic", "Maths", "Physics", "Engineering", "Startup", "EV", "Drone", "NYC", "Project"].map((tag) => (
+          {["Academic", "Evidence", "Project", "Reflection"].map((tag) => (
             <Badge key={tag}>{tag}</Badge>
           ))}
         </div>

@@ -9,7 +9,7 @@ export default async function ProjectsPage() {
     <AppShell>
       <PageHeader
         eyebrow="V2"
-        title="Engineering Projects"
+        title="Projects"
         description="Prefer one substantial project with real testing and reflection over several shallow builds."
       />
       <div className="grid gap-6 lg:grid-cols-2">

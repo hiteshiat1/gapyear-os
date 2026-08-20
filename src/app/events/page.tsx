@@ -20,7 +20,7 @@ export default async function EventsPage() {
       <PageHeader
         eyebrow="Conf/Events"
         title="Conf/Events"
-        description="Editable conference, meetup, university, startup, and engineering event log with structured reflections."
+        description="Editable conference, meetup, university, and event log with structured reflections."
       />
       <div className="grid gap-6 xl:grid-cols-[1fr_1.4fr]">
         <Card>

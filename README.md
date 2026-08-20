@@ -1,6 +1,6 @@
-# Gap Year OS
+# ALevels.io
 
-A private gap-year operating system for academic recovery, tutoring, engineering projects, startup experience, reflection, analytics, and a selective public portfolio.
+A private A-Levels operating system for academic planning, tutoring, projects, evidence, reflection, analytics, and a selective public portfolio.
 
 ## Architecture
 

@@ -160,7 +160,7 @@ export default async function TodayPage() {
                 <input name="sleepHours" type="number" min="0" step="0.25" defaultValue={dailyPlan?.sleepHours ?? ""} placeholder="Sleep hours" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
               </div>
               <textarea name="academicGoal" defaultValue={dailyPlan?.academicGoal ?? ""} placeholder="Today's main academic goal" className="min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              <textarea name="personalGoal" defaultValue={dailyPlan?.personalGoal ?? ""} placeholder="Today's personal/engineering goal" className="min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+              <textarea name="personalGoal" defaultValue={dailyPlan?.personalGoal ?? ""} placeholder="Today's personal goal" className="min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
               <button className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white">Save check-in</button>
             </form>
           </Card>
