@@ -2,19 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { generateWeeklyTasksFromDate } from "@/lib/repositories/daily-plans";
 import {
   saveCanonicalOnboardingSubjects,
   saveStudyAvailability,
+  upsertStudentOnboardingProfile,
   validateOnboardingSubjects,
   type OnboardingSubjectInput,
-  upsertStudentOnboardingProfile,
   type StudentStage,
 } from "@/lib/repositories/onboarding";
-import { seedAllSyllabuses } from "@/lib/repositories/syllabus";
-import { todayIso } from "@/lib/repositories/common";
+import { getSupabaseForRead, requireUser } from "@/lib/repositories/common";
 
-export async function saveOnboardingAction(formData: FormData) {
+export async function updateAcademicSetupAction(formData: FormData) {
   try {
     const firstName = formData.get("firstName")?.toString() || null;
     const schoolCollege = formData.get("schoolCollege")?.toString() || null;
@@ -31,9 +29,6 @@ export async function saveOnboardingAction(formData: FormData) {
       weekdayStudyHours: optionalHours(formData.get("weekdayDefaultMinutes")),
       weekendStudyHours: optionalHours(formData.get("weekendDefaultMinutes")),
       lighterDays,
-      tutors: formData.get("tutors")?.toString() || null,
-      nextAssessments: formData.get("nextAssessments")?.toString() || null,
-      visualTone: formData.get("visualTone") === "feminine" ? "feminine" : "masculine",
       onboardingStep: 3,
       onboardingCompleted: true,
     });
@@ -44,20 +39,54 @@ export async function saveOnboardingAction(formData: FormData) {
       weekendDefaultMinutes: optionalNumber(formData.get("weekendDefaultMinutes")),
       lighterDays,
     });
-    const selectedSubjectNames = subjects.filter((subject) => subject.referenceSubjectId).map((subject) => subject.name);
-    await seedAllSyllabuses(selectedSubjectNames);
-    await generateWeeklyTasksFromDate(todayIso());
+
+    const supabase = await getSupabaseForRead();
+    const user = await requireUser();
+    if (supabase) {
+      await supabase.from("audit_log").insert({
+        actor_id: user.id,
+        action: "student_changed_academic_setup",
+        entity_type: "student_subjects",
+        entity_id: user.id,
+        new_value: { subjectCount: subjects.filter((subject) => subject.referenceSubjectId).length },
+      });
+    }
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Could not save onboarding. Please try again.";
-    redirect(`/onboarding?error=${encodeURIComponent(message)}`);
+    const message = error instanceof Error ? error.message : "Could not save changes. Please try again.";
+    redirect(`/settings/academic?error=${encodeURIComponent(message)}`);
   }
 
-  revalidatePath("/");
-  revalidatePath("/onboarding");
+  revalidatePath("/settings/academic");
+  revalidatePath("/dashboard");
   revalidatePath("/subjects");
-  revalidatePath("/settings/syllabus");
-  revalidatePath("/today");
-  redirect("/");
+  redirect("/settings/academic");
+}
+
+export async function removeAcademicSubjectAction(formData: FormData) {
+  const studentSubjectId = String(formData.get("studentSubjectId") ?? "");
+  if (!studentSubjectId) throw new Error("Missing subject.");
+
+  const supabase = await getSupabaseForRead();
+  const user = await requireUser();
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const { error } = await supabase
+    .from("student_subjects")
+    .update({ active: false })
+    .eq("id", studentSubjectId)
+    .eq("owner_id", user.id);
+  if (error) throw new Error(error.message);
+
+  await supabase.from("audit_log").insert({
+    actor_id: user.id,
+    action: "student_removed_subject",
+    entity_type: "student_subjects",
+    entity_id: studentSubjectId,
+  });
+
+  revalidatePath("/settings/academic");
+  revalidatePath("/dashboard");
+  revalidatePath("/subjects");
 }
 
 function subjectFromForm(formData: FormData, index: number): OnboardingSubjectInput {

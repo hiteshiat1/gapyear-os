@@ -1,5 +1,6 @@
 import type { Subject } from "@/types/domain";
 import { getSupabaseForRead, requireUser } from "./common";
+import { getBoardOfferings, getGradeOptions, getReferenceSpecifications, getReferenceSubjects } from "./reference-data";
 import { getSubjects } from "./subjects";
 
 export type StudentStage = "Year 12" | "Year 13" | "Resit-Gap Year";
@@ -37,6 +38,57 @@ export type OnboardingSubjectInput = {
   targetGrade?: string | null;
   schoolPredictedGrade?: string | null;
 };
+
+export async function validateOnboardingSubjects(subjects: OnboardingSubjectInput[]) {
+  const selected = subjects.filter((subject) => subject.referenceSubjectId);
+  if (selected.length === 0) {
+    throw new Error("Select at least one A-Level subject.");
+  }
+
+  const duplicateSubject = selected.find((subject, index) =>
+    selected.some((item, itemIndex) => itemIndex !== index && item.referenceSubjectId === subject.referenceSubjectId),
+  );
+  if (duplicateSubject) {
+    throw new Error("Duplicate subject selection is not allowed.");
+  }
+
+  const [referenceSubjects, offerings, specifications, grades] = await Promise.all([
+    getReferenceSubjects(),
+    getBoardOfferings(),
+    getReferenceSpecifications(),
+    getGradeOptions(),
+  ]);
+  const subjectIds = new Set(referenceSubjects.map((subject) => subject.id));
+  const validGrades = new Set(["", "Not sure", "Not provided yet", ...grades.map((grade) => grade.grade)]);
+  const targetGrades = new Set(["", "Not sure", ...grades.filter((grade) => grade.isTargetSelectable).map((grade) => grade.grade)]);
+
+  for (const subject of selected) {
+    if (!subject.referenceSubjectId || !subjectIds.has(subject.referenceSubjectId)) {
+      throw new Error("Invalid subject selection.");
+    }
+
+    if (subject.examBoardId) {
+      const validOffering = offerings.some(
+        (offering) => offering.subjectId === subject.referenceSubjectId && offering.id === subject.examBoardId,
+      );
+      if (!validOffering) throw new Error("Invalid exam-board selection for subject.");
+    }
+
+    if (subject.specificationId) {
+      const validSpecification = specifications.some(
+        (spec) =>
+          spec.id === subject.specificationId &&
+          spec.subjectId === subject.referenceSubjectId &&
+          (!subject.examBoardId || spec.examBoardId === subject.examBoardId),
+      );
+      if (!validSpecification) throw new Error("Invalid specification selection.");
+    }
+
+    if (!validGrades.has(subject.achievedGrade ?? "")) throw new Error("Invalid self-grade value.");
+    if (!validGrades.has(subject.schoolPredictedGrade ?? "")) throw new Error("Invalid school-predicted grade value.");
+    if (!targetGrades.has(subject.targetGrade ?? "")) throw new Error("Invalid target-grade value.");
+  }
+}
 
 export async function getStudentOnboardingProfile() {
   const supabase = await getSupabaseForRead();

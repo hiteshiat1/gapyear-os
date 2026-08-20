@@ -16,6 +16,7 @@ const aLevelsSection = {
   items: [
     { href: "/onboarding", label: "Onboarding", icon: "UserCheck" },
     { href: "/subjects", label: "Subjects", icon: "GraduationCap" },
+    { href: "/settings/academic", label: "Academic Setup", icon: "Settings" },
     { href: "/settings/syllabus", label: "Syllabus", icon: "BookOpen" },
     { href: "/tutoring", label: "Tutoring", icon: "Users" },
     { href: "/library", label: "Library", icon: "Library" },
