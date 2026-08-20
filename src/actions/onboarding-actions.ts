@@ -20,36 +20,42 @@ import { seedAllSyllabuses } from "@/lib/repositories/syllabus";
 import { todayIso } from "@/lib/repositories/common";
 
 export async function saveOnboardingAction(formData: FormData) {
-  const firstName = formData.get("firstName")?.toString() || null;
-  const schoolCollege = formData.get("schoolCollege")?.toString() || null;
-  const stage = (formData.get("stage")?.toString() || "Year 12") as StudentStage;
-  const lighterDays = formData.getAll("lighterDays").map(String);
+  try {
+    const firstName = formData.get("firstName")?.toString() || null;
+    const schoolCollege = formData.get("schoolCollege")?.toString() || null;
+    const stage = (formData.get("stage")?.toString() || "Year 12") as StudentStage;
+    const lighterDays = formData.getAll("lighterDays").map(String);
 
-  await upsertStudentOnboardingProfile({
-    firstName,
-    schoolCollege,
-    stage,
-    weekdayStudyHours: optionalHours(formData.get("weekdayDefaultMinutes")),
-    weekendStudyHours: optionalHours(formData.get("weekendDefaultMinutes")),
-    lighterDays,
-    tutors: formData.get("tutors")?.toString() || null,
-    nextAssessments: formData.get("nextAssessments")?.toString() || null,
-    visualTone: formData.get("visualTone") === "feminine" ? "feminine" : "masculine",
-    onboardingStep: 3,
-    onboardingCompleted: true,
-  });
+    const subjects = [0, 1, 2, 3, 4].map((index) => subjectFromForm(formData, index));
+    await validateOnboardingSubjects(subjects);
 
-  const subjects = [0, 1, 2, 3, 4].map((index) => subjectFromForm(formData, index));
-  await validateOnboardingSubjects(subjects);
-  await saveCanonicalOnboardingSubjects(subjects);
-  await saveStudyAvailability({
-    weekdayDefaultMinutes: optionalNumber(formData.get("weekdayDefaultMinutes")),
-    weekendDefaultMinutes: optionalNumber(formData.get("weekendDefaultMinutes")),
-    lighterDays,
-  });
-  const selectedSubjectNames = subjects.filter((subject) => subject.referenceSubjectId).map((subject) => subject.name);
-  await seedAllSyllabuses(selectedSubjectNames);
-  await generateWeeklyTasksFromDate(todayIso());
+    await upsertStudentOnboardingProfile({
+      firstName,
+      schoolCollege,
+      stage,
+      weekdayStudyHours: optionalHours(formData.get("weekdayDefaultMinutes")),
+      weekendStudyHours: optionalHours(formData.get("weekendDefaultMinutes")),
+      lighterDays,
+      tutors: formData.get("tutors")?.toString() || null,
+      nextAssessments: formData.get("nextAssessments")?.toString() || null,
+      visualTone: formData.get("visualTone") === "feminine" ? "feminine" : "masculine",
+      onboardingStep: 3,
+      onboardingCompleted: true,
+    });
+
+    await saveCanonicalOnboardingSubjects(subjects);
+    await saveStudyAvailability({
+      weekdayDefaultMinutes: optionalNumber(formData.get("weekdayDefaultMinutes")),
+      weekendDefaultMinutes: optionalNumber(formData.get("weekendDefaultMinutes")),
+      lighterDays,
+    });
+    const selectedSubjectNames = subjects.filter((subject) => subject.referenceSubjectId).map((subject) => subject.name);
+    await seedAllSyllabuses(selectedSubjectNames);
+    await generateWeeklyTasksFromDate(todayIso());
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Could not save onboarding. Please try again.";
+    redirect(`/onboarding?error=${encodeURIComponent(message)}`);
+  }
 
   revalidatePath("/");
   revalidatePath("/onboarding");

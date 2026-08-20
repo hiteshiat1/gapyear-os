@@ -15,8 +15,13 @@ import { ReferenceSubjectSelector } from "./reference-subject-selector";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export default async function OnboardingPage() {
-  const [profile, subjects, referenceSubjects, boards, specifications, options, grades] = await Promise.all([
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const [{ error }, profile, subjects, referenceSubjects, boards, specifications, options, grades] = await Promise.all([
+    searchParams,
     getStudentOnboardingProfile().catch(() => null),
     getSubjects(),
     getReferenceSubjects(),
@@ -36,6 +41,11 @@ export default async function OnboardingPage() {
 
       <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
         <Card>
+          {error ? (
+            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+              <p className="text-sm font-medium text-red-800">{error}</p>
+            </div>
+          ) : null}
           {!referenceSubjects.length ? (
             <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
               <form action={seedReferenceDataAction}>
