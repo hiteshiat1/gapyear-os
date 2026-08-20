@@ -191,6 +191,7 @@ export async function getReferenceSubjects(): Promise<ReferenceSubjectOption[]> 
     .from("a_level_subjects")
     .select("id,slug,name,category,topic_support_status")
     .eq("active", true)
+    .eq("student_selectable", true)
     .order("sort_order")
     .order("name");
 
