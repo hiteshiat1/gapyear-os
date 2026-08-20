@@ -12,6 +12,8 @@ import type {
 } from "@/lib/repositories/reference-data";
 import type { OnboardingSelectedSubject, StudentOnboardingProfile } from "@/lib/repositories/onboarding";
 
+const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
 export function AcademicSetupForm({
   profile,
   selectedSubjects,
@@ -128,6 +130,19 @@ export function AcademicSetupForm({
             defaultValue={profile?.weekendStudyHours ? Math.round(profile.weekendStudyHours * 60) : ""}
             className="rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 md:grid-cols-4">
+          {days.map((day) => (
+            <label key={day} className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm">
+              <input
+                name="lighterDays"
+                type="checkbox"
+                value={day}
+                defaultChecked={profile?.lighterDays.includes(day)}
+              />
+              {day}
+            </label>
+          ))}
         </div>
       </section>
 

@@ -40,6 +40,7 @@ export default async function AcademicSettingsPage({
       ) : null}
       <Card>
         <AcademicSetupForm
+          key={`${profile?.updatedAt ?? "new"}-${selectedSubjects.map((subject) => subject.id).join(",")}`}
           profile={profile}
           selectedSubjects={selectedSubjects}
           referenceSubjects={referenceSubjects}

@@ -19,6 +19,7 @@ export type StudentOnboardingProfile = {
   visualTone: VisualTone;
   onboardingStep: number;
   onboardingCompleted: boolean;
+  updatedAt: string | null;
 };
 
 export type VisualTone = "masculine" | "feminine";
@@ -119,6 +120,7 @@ export async function getStudentOnboardingProfile() {
     visualTone: data.visual_tone === "feminine" ? "feminine" : "masculine",
     onboardingStep: data.onboarding_step,
     onboardingCompleted: data.onboarding_completed,
+    updatedAt: data.updated_at ?? null,
   } satisfies StudentOnboardingProfile;
 }
 
