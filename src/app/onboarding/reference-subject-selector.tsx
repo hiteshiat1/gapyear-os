@@ -20,25 +20,46 @@ type SubjectSelection = {
   selectedOptionIds: string[];
 };
 
+export type InitialSubjectSelection = {
+  subjectId: string | null;
+  boardId: string | null;
+  specificationId: string | null;
+  confirmationStatus: "confirmed" | "needs_confirmation";
+  selfGrade: string | null;
+  schoolPredictedGrade: string | null;
+  targetGrade: string | null;
+  selectedOptionIds: string[];
+};
+
 export function ReferenceSubjectSelector({
   subjects,
   boards,
   specifications,
   options,
   grades,
+  initialSubjects,
 }: {
   subjects: ReferenceSubjectOption[];
   boards: ReferenceBoardOption[];
   specifications: ReferenceSpecificationOption[];
   options: ReferenceComponentOption[];
   grades: GradeOption[];
+  initialSubjects?: InitialSubjectSelection[];
 }) {
-  const [rows, setRows] = useState<SubjectSelection[]>([
-    blankRow(),
-    blankRow(),
-    blankRow(),
-    blankRow(),
-  ]);
+  const [rows, setRows] = useState<SubjectSelection[]>(() => {
+    const seeded = (initialSubjects ?? []).slice(0, 4).map((subject) => ({
+      subjectId: subject.subjectId ?? "",
+      boardId: subject.boardId ?? "",
+      specificationId: subject.specificationId ?? "",
+      confirmationStatus: subject.confirmationStatus,
+      selfGrade: subject.selfGrade ?? "",
+      schoolPredictedGrade: subject.schoolPredictedGrade ?? "Not provided yet",
+      targetGrade: subject.targetGrade ?? "",
+      selectedOptionIds: subject.selectedOptionIds,
+    }));
+    while (seeded.length < 4) seeded.push(blankRow());
+    return seeded;
+  });
   const targetGrades = grades.filter((grade) => grade.isTargetSelectable);
 
   const selectedSubjects = new Set(rows.map((row) => row.subjectId).filter(Boolean));

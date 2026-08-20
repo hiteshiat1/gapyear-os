@@ -322,6 +322,10 @@ export async function saveOnboardingSubjects(inputs: OnboardingSubjectInput[]) {
 
 export type OnboardingSelectedSubject = {
   id: string;
+  subjectId: string | null;
+  examBoardId: string | null;
+  specificationId: string | null;
+  selectedOptionIds: string[];
   subjectName: string;
   boardName: string | null;
   specificationCode: string | null;
@@ -343,7 +347,7 @@ export async function getMyOnboardingSubjects(): Promise<OnboardingSelectedSubje
   const { data, error } = await supabase
     .from("student_subjects")
     .select(
-      "id,self_grade,school_predicted_grade,target_grade,specification_confirmation_status,topic_support_status,a_level_subjects(name),exam_boards(name),specifications(specification_code,specification_name)",
+      "id,subject_id,exam_board_id,specification_id,self_grade,school_predicted_grade,target_grade,specification_confirmation_status,topic_support_status,a_level_subjects(name),exam_boards(name),specifications(specification_code,specification_name)",
     )
     .eq("owner_id", user.id)
     .eq("active", true)
@@ -357,6 +361,9 @@ export async function getMyOnboardingSubjects(): Promise<OnboardingSelectedSubje
 
   type Row = {
     id: string;
+    subject_id: string | null;
+    exam_board_id: string | null;
+    specification_id: string | null;
     self_grade: string | null;
     school_predicted_grade: string | null;
     target_grade: string | null;
@@ -373,6 +380,26 @@ export async function getMyOnboardingSubjects(): Promise<OnboardingSelectedSubje
     legacySubjects.map((subject) => [subject.name.trim().toLowerCase(), subject.syllabusCompletion]),
   );
 
+  const studentSubjectIds = rows.map((row) => row.id);
+  const optionsBySubject = new Map<string, string[]>();
+  if (studentSubjectIds.length) {
+    const { data: optionRows, error: optionError } = await supabase
+      .from("student_specification_options")
+      .select("student_subject_id,specification_option_id")
+      .eq("owner_id", user.id)
+      .in("student_subject_id", studentSubjectIds);
+
+    if (optionError) {
+      console.error("getMyOnboardingSubjects options failed", optionError.message);
+    } else {
+      for (const row of optionRows ?? []) {
+        const list = optionsBySubject.get(row.student_subject_id) ?? [];
+        list.push(row.specification_option_id);
+        optionsBySubject.set(row.student_subject_id, list);
+      }
+    }
+  }
+
   return rows.map((row) => {
     const subject = one(row.a_level_subjects);
     const board = one(row.exam_boards);
@@ -381,6 +408,10 @@ export async function getMyOnboardingSubjects(): Promise<OnboardingSelectedSubje
 
     return {
       id: row.id,
+      subjectId: row.subject_id,
+      examBoardId: row.exam_board_id,
+      specificationId: row.specification_id,
+      selectedOptionIds: optionsBySubject.get(row.id) ?? [],
       subjectName,
       boardName: board?.name ?? null,
       specificationCode: specification?.specification_code ?? null,

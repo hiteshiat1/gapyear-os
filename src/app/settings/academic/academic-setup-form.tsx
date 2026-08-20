@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { updateAcademicSetupAction, removeAcademicSubjectAction } from "@/actions/academic-settings-actions";
-import { ReferenceSubjectSelector } from "@/app/onboarding/reference-subject-selector";
+import { ReferenceSubjectSelector, type InitialSubjectSelection } from "@/app/onboarding/reference-subject-selector";
 import type {
   GradeOption,
   ReferenceBoardOption,
@@ -32,6 +32,16 @@ export function AcademicSetupForm({
   grades: GradeOption[];
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const initialSubjectSelections: InitialSubjectSelection[] = selectedSubjects.map((subject) => ({
+    subjectId: subject.subjectId,
+    boardId: subject.examBoardId,
+    specificationId: subject.specificationId,
+    confirmationStatus: subject.confirmationStatus,
+    selfGrade: subject.selfGrade,
+    schoolPredictedGrade: subject.schoolPredictedGrade,
+    targetGrade: subject.targetGrade,
+    selectedOptionIds: subject.selectedOptionIds,
+  }));
 
   if (!isEditing) {
     return (
@@ -106,7 +116,14 @@ export function AcademicSetupForm({
 
       <section>
         <h2 className="text-lg font-semibold">A-Level Subjects</h2>
-        <ReferenceSubjectSelector subjects={referenceSubjects} boards={boards} specifications={specifications} options={options} grades={grades} />
+        <ReferenceSubjectSelector
+          subjects={referenceSubjects}
+          boards={boards}
+          specifications={specifications}
+          options={options}
+          grades={grades}
+          initialSubjects={initialSubjectSelections}
+        />
       </section>
 
       <section>
