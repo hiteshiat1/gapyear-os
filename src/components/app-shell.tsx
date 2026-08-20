@@ -71,13 +71,24 @@ export async function AppShell({ children }: { children: ReactNode }) {
   const theme = tone === "feminine" ? feminineTheme : masculineTheme;
   const isAdmin = profile?.role === "admin";
 
+  const adminSection = {
+    title: "Admin",
+    items: [
+      { href: "/admin", label: "Overview", icon: "ShieldCheck" as const },
+      { href: "/admin/subjects", label: "Subjects", icon: "GraduationCap" as const },
+      { href: "/admin/syllabuses", label: "Syllabuses", icon: "BookOpen" as const },
+      { href: "/admin/users", label: "Users", icon: "Users" as const },
+      { href: "/admin/diagnostics", label: "Diagnostics", icon: "ClipboardCheck" as const },
+    ],
+  } satisfies { title: string; items: NavItem[] };
+
   const entries: NavEntry[] = [
     ...topItems.map((item) => ({ kind: "item" as const, item })),
     { kind: "section" as const, section: aLevelsSection },
     { kind: "section" as const, section: progressSection },
     { kind: "section" as const, section: extraCurricularsSection },
     { kind: "section" as const, section: nextStepsSection },
-    ...(isAdmin ? [{ kind: "item" as const, item: { href: "/admin", label: "Admin", icon: "ShieldCheck" as const } }] : []),
+    ...(isAdmin ? [{ kind: "section" as const, section: adminSection }] : []),
   ];
 
   const mobileItems: NavItem[] = isAdmin
