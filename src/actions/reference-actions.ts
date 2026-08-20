@@ -7,4 +7,6 @@ export async function seedReferenceDataAction() {
   await seedReferenceData();
   revalidatePath("/onboarding");
   revalidatePath("/settings/reference-data");
+  revalidatePath("/admin/diagnostics");
+  revalidatePath("/admin/subjects");
 }

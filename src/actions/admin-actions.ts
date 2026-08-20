@@ -11,4 +11,5 @@ export async function updateUserRoleAction(formData: FormData) {
 
   await updateUserRole(userId, role);
   revalidatePath("/admin");
+  revalidatePath("/admin/users");
 }
