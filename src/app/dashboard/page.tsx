@@ -51,10 +51,16 @@ export default async function DashboardPage() {
               </thead>
               <tbody>
                 {subjects.map((subject) => {
-                  const label = progressLabelFromEvidence({
-                    topicCount: subject.topicSupportStatus === "full" ? 10 : 0,
-                    percent: subject.progressPercent,
-                  });
+                  const hasRealProgress = subject.topicSupportStatus === "full" && subject.progressPercent != null;
+                  const label = hasRealProgress
+                    ? progressLabelFromEvidence({
+                        // topicCount: 3 is the minimum that lets percent-based thresholds
+                        // drive the result instead of the "Early evidence" (< 3) branch —
+                        // it does not claim to know the real topic count.
+                        topicCount: 3,
+                        percent: subject.progressPercent,
+                      })
+                    : null;
                   return (
                     <tr key={subject.id} className="border-b border-slate-100 last:border-0">
                       <td className="py-3 pr-4 font-medium">{subject.subjectName}</td>
@@ -64,10 +70,18 @@ export default async function DashboardPage() {
                       </td>
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-2">
-                          {subject.progressPercent != null ? (
-                            <div className="w-20"><ProgressBar value={subject.progressPercent} /></div>
-                          ) : null}
-                          <Badge tone={label === "On track" ? "green" : label === "Needs attention" ? "red" : "slate"}>{label}</Badge>
+                          {hasRealProgress ? (
+                            <>
+                              <div className="w-20"><ProgressBar value={subject.progressPercent!} /></div>
+                              <Badge tone={label === "On track" ? "green" : label === "Needs attention" ? "red" : "slate"}>
+                                {label}
+                              </Badge>
+                            </>
+                          ) : (
+                            <Badge tone="amber">
+                              {subject.topicSupportStatus === "full" ? "Not assessed" : "Coming soon"}
+                            </Badge>
+                          )}
                         </div>
                       </td>
                     </tr>
