@@ -6,29 +6,17 @@ Create a new Supabase project from the Supabase dashboard.
 
 ## 2. Run SQL
 
-Run these files in the SQL editor in this order:
+Link the Supabase CLI to your project once (`supabase login`, then `supabase link --project-ref YOUR_PROJECT_REF`), then apply everything with:
 
-1. `supabase/schema.sql`
-2. `supabase/migrations/20260816_syllabus_planner.sql`
-3. `supabase/migrations/20260818_alevels_onboarding.sql`
-4. `supabase/migrations/20260818_profile_theme.sql`
-5. `supabase/migrations/20260818_future_map.sql`
-6. `supabase/migrations/20260818_reference_onboarding.sql`
-7. `supabase/seed.sql`
+```bash
+supabase db push
+```
 
-`schema.sql` creates tables, triggers, RLS policies, indexes, activity history, topic progress history, weekly snapshots, and import job tracking.
+This runs `supabase/schema.sql`-equivalent setup plus every file in `supabase/migrations/`, in timestamp order, tracked in Supabase's own migration history table. Do not paste migration SQL into the dashboard SQL editor by hand — doing so leaves the CLI's tracking table out of sync with what's actually applied, which previously caused a production incident (a column the app code depended on silently didn't exist, because a migration was applied via the SQL editor but never recorded in migration history, so nobody could tell it was missing until a query failed at runtime).
 
-`20260816_syllabus_planner.sql` adds official syllabus reference topics, per-user topic progress, diagnostics, planner metadata, and paper-code fields.
+If you ever do need to run something manually in the SQL editor (e.g. a one-off hotfix before a proper migration file exists), immediately follow up with `supabase migration repair --status applied <version>` so the CLI's tracking stays accurate, and add the equivalent migration file afterward.
 
-`20260818_alevels_onboarding.sql` adds resumable student onboarding, stage, study availability, and board/specification/prediction fields on subjects.
-
-`20260818_profile_theme.sql` adds the two-option visual tone setting used by the app shell.
-
-`20260818_future_map.sql` adds interests, course shortlist, university choices, career families, evidence links, and Future Map storage.
-
-`20260818_reference_onboarding.sql` adds canonical A-Level subjects, exam boards, offerings, specifications, papers, grade scales, student subject selections, grade history, and study availability.
-
-`seed.sql` creates a helper function only. It does not insert data until you call it with the first user UUID.
+After `db push`, run `supabase/seed.sql` in the SQL editor — it creates a helper function only and does not insert data until you call it with the first user UUID (see step 5).
 
 ## 3. Configure Local Environment
 
