@@ -20,7 +20,16 @@ export default async function OnboardingPage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const [{ error }, profile, subjects, referenceSubjects, boards, specifications, options, grades] = await Promise.all([
+  const [
+    { error },
+    profile,
+    subjects,
+    referenceSubjectsResult,
+    boardsResult,
+    specificationsResult,
+    optionsResult,
+    grades,
+  ] = await Promise.all([
     searchParams,
     getStudentOnboardingProfile().catch(() => null),
     getSubjects(),
@@ -30,6 +39,12 @@ export default async function OnboardingPage({
     getReferenceOptions(),
     getGradeOptions(),
   ]);
+
+  const referenceSubjects = referenceSubjectsResult.data;
+  const boards = boardsResult.data;
+  const specifications = specificationsResult.data;
+  const options = optionsResult.data;
+  const referenceDataError = referenceSubjectsResult.error ?? boardsResult.error ?? specificationsResult.error ?? optionsResult.error;
 
   return (
     <AppShell>
@@ -46,7 +61,12 @@ export default async function OnboardingPage({
               <p className="text-sm font-medium text-red-800">{error}</p>
             </div>
           ) : null}
-          {!referenceSubjects.length ? (
+          {referenceDataError ? (
+            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+              <p className="text-sm font-medium text-red-800">Couldn&apos;t load subject reference data: {referenceDataError}</p>
+            </div>
+          ) : null}
+          {!referenceDataError && !referenceSubjects.length ? (
             <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
               <form action={seedReferenceDataAction}>
                 <button type="submit" className="rounded-md bg-amber-900 px-4 py-2 text-sm font-medium text-white">
