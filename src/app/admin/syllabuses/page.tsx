@@ -2,7 +2,10 @@ import { Badge, Card, PageHeader } from "@/components/ui";
 import { getReferenceSpecifications, getExamBoards } from "@/lib/repositories/reference-data";
 
 export default async function AdminSyllabusesPage() {
-  const [specifications, boards] = await Promise.all([getReferenceSpecifications(), getExamBoards()]);
+  const [specificationsResult, boardsResult] = await Promise.all([getReferenceSpecifications(), getExamBoards()]);
+  const specifications = specificationsResult.data;
+  const boards = boardsResult.data;
+  const error = specificationsResult.error ?? boardsResult.error;
   const boardById = new Map(boards.map((board) => [board.id, board]));
 
   return (
@@ -12,6 +15,11 @@ export default async function AdminSyllabusesPage() {
         title="Syllabuses"
         description="All provisioned specifications across enabled and disabled subjects."
       />
+      {error ? (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-medium text-red-800">Couldn&apos;t load syllabus data: {error}</p>
+        </div>
+      ) : null}
       <Card>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
