@@ -3,7 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { isSupabaseConfigured, supabasePublishableKey, supabaseUrl } from "./config";
 import type { Database } from "@/types/database";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback", "/portfolio"];
+const PUBLIC_PATHS = ["/", "/login", "/auth/callback", "/portfolio"];
 const ONBOARDING_EXEMPT_PATHS = ["/onboarding", "/settings", "/admin", "/logout", "/api"];
 
 export async function updateSession(request: NextRequest) {
