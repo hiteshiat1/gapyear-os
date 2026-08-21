@@ -120,7 +120,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <Link href="/dashboard" className="block min-w-0">
-            <p className="text-lg font-semibold tracking-tight">ALevels.io</p>
+            <p className="text-lg font-semibold tracking-tight">Alevs.io</p>
             <p className={`mt-1 text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
           </Link>
         </div>
@@ -149,7 +149,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div className="min-w-0">
-              <p className="text-base font-semibold">ALevels.io</p>
+              <p className="text-base font-semibold">Alevs.io</p>
               <p className={`text-xs ${theme.subtle}`}>Plan. Study. Assess. Improve.</p>
             </div>
           </div>

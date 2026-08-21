@@ -1,6 +1,6 @@
 # Reference Data
 
-ALevels.io now separates canonical A-Level reference data from student-owned selections.
+Alevs.io now separates canonical A-Level reference data from student-owned selections.
 
 ## Source Hierarchy
 

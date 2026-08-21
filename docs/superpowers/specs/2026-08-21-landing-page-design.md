@@ -6,7 +6,7 @@
 
 ## Goals
 
-- Give signed-out visitors a real landing page at `/` describing what ALevels.io does, built from the app's actual feature set.
+- Give signed-out visitors a real landing page at `/` describing what Alevs.io does, built from the app's actual feature set.
 - Remove "Continue with Google" from the login page entirely.
 - Provide two clear calls to action (SIGN IN / CREATE ACCOUNT) that route into the existing `/login` page.
 - Apply the palette `#30343F / #FAFAFF / #E4D9FF / #273469 / #1E2749` to the landing page, and restyle `/login` to match so the two pages feel like one experience.
@@ -39,7 +39,7 @@ This keeps `/` as a single route with conditional rendering rather than a separa
 
 Sourced from the real nav structure in `src/components/app-shell.tsx`, not invented features:
 
-- **Hero**: "ALevels.io" wordmark, tagline "Plan. Study. Assess. Improve.", one-paragraph description ("Private A-Level planning, assessment, progress, and evidence tracking for students."), SIGN IN + CREATE ACCOUNT buttons.
+- **Hero**: "Alevs.io" wordmark, tagline "Plan. Study. Assess. Improve.", one-paragraph description ("Private A-Level planning, assessment, progress, and evidence tracking for students."), SIGN IN + CREATE ACCOUNT buttons.
 - **Feature groups**, mirroring the app's own sidebar sections:
   - *A-Levels*: subject tracking, syllabus coverage, tutoring, library resources.
   - *Progress*: assessments, goals, error log, analytics.

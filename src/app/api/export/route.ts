@@ -24,7 +24,7 @@ export async function GET() {
   return new NextResponse(body, {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": 'attachment; filename="gap-year-os-export.xlsx"',
+      "Content-Disposition": 'attachment; filename="alevs-io-export.xlsx"',
     },
   });
 }

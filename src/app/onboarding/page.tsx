@@ -35,7 +35,7 @@ export default async function OnboardingPage({
     <AppShell>
       <PageHeader
         eyebrow="Student Setup"
-        title="ALevels.io Onboarding"
+        title="Alevs.io Onboarding"
         description="Set the academic baseline once, then generate a starting plan from subjects, syllabus, goals, and available time."
       />
 

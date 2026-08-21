@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ALevels.io",
+  title: "Alevs.io",
   description:
     "A private A-Level planning, assessment, evidence, and progress platform for Year 12, Year 13, and resit students.",
 };

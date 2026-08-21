@@ -1136,7 +1136,7 @@ const topItems: NavItem[] = [
 ];
 ```
 
-Also update the two `<Link href="/" ...>` wordmark links inside `AppShell`'s return (desktop sidebar and mobile header, both currently link the "ALevels.io" title text to `/`) to `href="/dashboard"` instead, so clicking the logo doesn't bounce through a redirect unnecessarily. There are two occurrences — the desktop one wraps `<p className="text-lg font-semibold tracking-tight">ALevels.io</p>`, the mobile one wraps the header block with `<p className="text-base font-semibold">ALevels.io</p>`. Only the desktop one is an actual `<Link>`; the mobile header title is a plain `<div>`, not a link — leave that one as-is, only change the desktop `<Link href="/" ...>` to `<Link href="/dashboard" ...>`.
+Also update the two `<Link href="/" ...>` wordmark links inside `AppShell`'s return (desktop sidebar and mobile header, both currently link the "Alevs.io" title text to `/`) to `href="/dashboard"` instead, so clicking the logo doesn't bounce through a redirect unnecessarily. There are two occurrences — the desktop one wraps `<p className="text-lg font-semibold tracking-tight">Alevs.io</p>`, the mobile one wraps the header block with `<p className="text-base font-semibold">Alevs.io</p>`. Only the desktop one is an actual `<Link>`; the mobile header title is a plain `<div>`, not a link — leave that one as-is, only change the desktop `<Link href="/" ...>` to `<Link href="/dashboard" ...>`.
 
 - [ ] **Step 7: Type-check, lint, build**
 

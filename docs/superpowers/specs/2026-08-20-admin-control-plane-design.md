@@ -2,7 +2,7 @@
 
 ## Context
 
-ALevels.io currently has:
+Alevs.io currently has:
 - `profiles.role` (`student | parent | tutor | mentor | admin`) — existing role mechanism, already used to gate a single flat `/admin` page.
 - `a_level_subjects` / `exam_boards` / `board_subject_offerings` / `specifications` / `specification_options` / `papers` / `grade_scales` — canonical reference tables, admin-write-only via RLS (`is_admin()` policies added in a prior session).
 - `student_subjects` — student-owned selections (subject, board, spec, grades), written during onboarding. `/subjects` already reads from this table (rebuilt in a prior session), not the legacy `subjects` table.

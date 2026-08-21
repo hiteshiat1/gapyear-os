@@ -44,7 +44,7 @@ export function LandingPage() {
     <main className="min-h-screen bg-[#FAFAFF] text-[#30343F]">
       <section className="mx-auto max-w-5xl px-6 pt-20 pb-16 text-center sm:pt-28">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#273469]">
-          ALevels.io
+          Alevs.io
         </p>
         <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
           Plan. Study. Assess. Improve.
