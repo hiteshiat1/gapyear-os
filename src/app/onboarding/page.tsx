@@ -2,7 +2,7 @@ import { saveOnboardingAction } from "@/actions/onboarding-actions";
 import { seedReferenceDataAction } from "@/actions/reference-actions";
 import { AppShell } from "@/components/app-shell";
 import { Badge, Card, DataRow, PageHeader } from "@/components/ui";
-import { getStudentOnboardingProfile } from "@/lib/repositories/onboarding";
+import { getMyOnboardingSubjects, getStudentOnboardingProfile } from "@/lib/repositories/onboarding";
 import {
   getBoardOfferings,
   getGradeOptions,
@@ -11,7 +11,7 @@ import {
   getReferenceSubjects,
 } from "@/lib/repositories/reference-data";
 import { getSubjects } from "@/lib/repositories/subjects";
-import { ReferenceSubjectSelector } from "./reference-subject-selector";
+import { ReferenceSubjectSelector, type InitialSubjectSelection } from "./reference-subject-selector";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -24,6 +24,7 @@ export default async function OnboardingPage({
     { error },
     profile,
     subjects,
+    selectedSubjects,
     referenceSubjectsResult,
     boardsResult,
     specificationsResult,
@@ -33,6 +34,7 @@ export default async function OnboardingPage({
     searchParams,
     getStudentOnboardingProfile().catch(() => null),
     getSubjects(),
+    getMyOnboardingSubjects(),
     getReferenceSubjects(),
     getBoardOfferings(),
     getReferenceSpecifications(),
@@ -45,6 +47,17 @@ export default async function OnboardingPage({
   const specifications = specificationsResult.data;
   const options = optionsResult.data;
   const referenceDataError = referenceSubjectsResult.error ?? boardsResult.error ?? specificationsResult.error ?? optionsResult.error;
+
+  const initialSubjects: InitialSubjectSelection[] = selectedSubjects.map((subject) => ({
+    subjectId: subject.subjectId,
+    boardId: subject.examBoardId,
+    specificationId: subject.specificationId,
+    confirmationStatus: subject.confirmationStatus,
+    selfGrade: subject.selfGrade,
+    schoolPredictedGrade: subject.schoolPredictedGrade,
+    targetGrade: subject.targetGrade,
+    selectedOptionIds: subject.selectedOptionIds,
+  }));
 
   return (
     <AppShell>
@@ -118,6 +131,7 @@ export default async function OnboardingPage({
                   specifications={specifications}
                   options={options}
                   grades={grades}
+                  initialSubjects={initialSubjects}
                 />
               ) : (
                 <p className="mt-4 text-sm text-slate-500">Load subjects above to continue.</p>
