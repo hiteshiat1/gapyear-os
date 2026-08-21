@@ -15,7 +15,16 @@ export default async function AcademicSettingsPage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const [{ error }, profile, selectedSubjects, referenceSubjects, boards, specifications, options, grades] = await Promise.all([
+  const [
+    { error },
+    profile,
+    selectedSubjects,
+    referenceSubjectsResult,
+    boardsResult,
+    specificationsResult,
+    optionsResult,
+    grades,
+  ] = await Promise.all([
     searchParams,
     getStudentOnboardingProfile().catch(() => null),
     getMyOnboardingSubjects(),
@@ -25,6 +34,12 @@ export default async function AcademicSettingsPage({
     getReferenceOptions(),
     getGradeOptions(),
   ]);
+
+  const referenceSubjects = referenceSubjectsResult.data;
+  const boards = boardsResult.data;
+  const specifications = specificationsResult.data;
+  const options = optionsResult.data;
+  const referenceDataError = referenceSubjectsResult.error ?? boardsResult.error ?? specificationsResult.error ?? optionsResult.error;
 
   return (
     <AppShell>
@@ -36,6 +51,11 @@ export default async function AcademicSettingsPage({
       {error ? (
         <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
           <p className="text-sm font-medium text-red-800">{error}</p>
+        </div>
+      ) : null}
+      {referenceDataError ? (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-medium text-red-800">Couldn&apos;t load subject reference data: {referenceDataError}</p>
         </div>
       ) : null}
       <Card>
