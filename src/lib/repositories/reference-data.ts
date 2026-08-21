@@ -358,23 +358,50 @@ export async function getGradeOptions(): Promise<GradeOption[]> {
   }));
 }
 
-export async function getReferenceDiagnostics() {
-  const supabase = await getSupabaseForRead();
-  if (!supabase) return null;
+export type ReferenceDiagnostics = {
+  totalSubjects: number;
+  aqaOfferings: number;
+  edexcelOfferings: number;
+  boards: number;
+  specifications: number;
+  options: number;
+  fullTopicSpecifications: number;
+  comingSoonSpecifications: number;
+  subjectsWithNoVerifiedBoardOffering: number;
+  duplicateSpecificationCodes: number;
+};
 
-  const [
-    subjects,
-    boards,
-    specifications,
-    options,
-    offerings,
-  ] = await Promise.all([
+export type ReferenceDiagnosticsResult = { data: ReferenceDiagnostics | null; error: string | null };
+
+export async function getReferenceDiagnostics(): Promise<ReferenceDiagnosticsResult> {
+  const supabase = await getSupabaseForRead();
+  if (!supabase) return { data: null, error: "Supabase is not configured." };
+
+  const [subjectsResult, boardsResult, specificationsResult, optionsResult, offeringsResult] = await Promise.all([
     getReferenceSubjects(),
     getExamBoards(),
     getReferenceSpecifications(),
     getReferenceOptions(),
     getBoardOfferings(),
   ]);
+
+  const errors = [
+    subjectsResult.error,
+    boardsResult.error,
+    specificationsResult.error,
+    optionsResult.error,
+    offeringsResult.error,
+  ].filter((message): message is string => message !== null);
+
+  if (errors.length > 0) {
+    return { data: null, error: `${errors.length} diagnostic check(s) failed: ${errors.join("; ")}` };
+  }
+
+  const subjects = subjectsResult.data;
+  const boards = boardsResult.data;
+  const specifications = specificationsResult.data;
+  const options = optionsResult.data;
+  const offerings = offeringsResult.data;
 
   const duplicateSpecificationCodes = specifications.length - new Set(specifications.map((spec) => `${spec.examBoardId}:${spec.specificationCode}`)).size;
   const fullTopicSpecifications = specifications.filter((spec) => spec.topicSupportStatus === "full").length;
@@ -383,16 +410,19 @@ export async function getReferenceDiagnostics() {
   const subjectsWithOfferings = new Set(offerings.map((offering) => offering.subjectId));
 
   return {
-    totalSubjects: subjects.length,
-    aqaOfferings: offerings.filter((offering) => offering.code === "AQA").length,
-    edexcelOfferings: offerings.filter((offering) => offering.code === "EDEXCEL").length,
-    boards: boards.length,
-    specifications: specifications.length,
-    options: options.length,
-    fullTopicSpecifications,
-    comingSoonSpecifications,
-    subjectsWithNoVerifiedBoardOffering: subjects.filter((subject) => !subjectsWithOfferings.has(subject.id)).length,
-    duplicateSpecificationCodes,
+    data: {
+      totalSubjects: subjects.length,
+      aqaOfferings: offerings.filter((offering) => offering.code === "AQA").length,
+      edexcelOfferings: offerings.filter((offering) => offering.code === "EDEXCEL").length,
+      boards: boards.length,
+      specifications: specifications.length,
+      options: options.length,
+      fullTopicSpecifications,
+      comingSoonSpecifications,
+      subjectsWithNoVerifiedBoardOffering: subjects.filter((subject) => !subjectsWithOfferings.has(subject.id)).length,
+      duplicateSpecificationCodes,
+    },
+    error: null,
   };
 }
 
@@ -594,9 +624,11 @@ export type SubjectAdminRow = {
   provisioning: ProvisioningPlanEntry[];
 };
 
-export async function getSubjectsForAdmin(): Promise<SubjectAdminRow[]> {
+export type SubjectAdminResult = { data: SubjectAdminRow[] | null; error: string | null };
+
+export async function getSubjectsForAdmin(): Promise<SubjectAdminResult> {
   const supabase = await getSupabaseForRead();
-  if (!supabase) return [];
+  if (!supabase) return { data: null, error: "Supabase is not configured." };
 
   const { data: subjects, error } = await supabase
     .from("a_level_subjects")
@@ -605,7 +637,7 @@ export async function getSubjectsForAdmin(): Promise<SubjectAdminRow[]> {
     .order("name");
   if (error) {
     console.error("getSubjectsForAdmin failed", error.message);
-    return [];
+    return { data: null, error: error.message };
   }
 
   const { data: statusRows } = await supabase
@@ -625,13 +657,16 @@ export async function getSubjectsForAdmin(): Promise<SubjectAdminRow[]> {
     statusBySubject.set(row.subject_id, list);
   }
 
-  return subjects.map((subject) => ({
-    id: subject.id,
-    slug: subject.slug,
-    name: subject.name,
-    category: subject.category,
-    active: subject.active,
-    studentSelectable: subject.student_selectable,
-    provisioning: statusBySubject.get(subject.id) ?? [],
-  }));
+  return {
+    data: subjects.map((subject) => ({
+      id: subject.id,
+      slug: subject.slug,
+      name: subject.name,
+      category: subject.category,
+      active: subject.active,
+      studentSelectable: subject.student_selectable,
+      provisioning: statusBySubject.get(subject.id) ?? [],
+    })),
+    error: null,
+  };
 }

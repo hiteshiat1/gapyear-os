@@ -3,7 +3,7 @@ import { Card, DataRow, PageHeader } from "@/components/ui";
 import { getReferenceDiagnostics } from "@/lib/repositories/reference-data";
 
 export default async function AdminDiagnosticsPage() {
-  const diagnostics = await getReferenceDiagnostics().catch(() => null);
+  const { data: diagnostics, error } = await getReferenceDiagnostics();
 
   return (
     <>
@@ -12,6 +12,11 @@ export default async function AdminDiagnosticsPage() {
         title="Diagnostics"
         description="Load or repair the base reference catalogue (exam boards, subjects, grade scales)."
       />
+      {error ? (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-medium text-red-800">{error}</p>
+        </div>
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-[0.8fr_1fr]">
         <Card>
           <h2 className="text-lg font-semibold">Reference Import</h2>

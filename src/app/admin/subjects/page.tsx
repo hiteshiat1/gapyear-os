@@ -3,7 +3,7 @@ import { Badge, Card, PageHeader } from "@/components/ui";
 import { getSubjectsForAdmin } from "@/lib/repositories/reference-data";
 
 export default async function AdminSubjectsPage() {
-  const subjects = await getSubjectsForAdmin();
+  const { data: subjects, error } = await getSubjectsForAdmin();
 
   return (
     <>
@@ -12,6 +12,11 @@ export default async function AdminSubjectsPage() {
         title="Subjects"
         description="Enable subjects for student selection. Enabling provisions AQA and Pearson Edexcel reference data where officially available."
       />
+      {error ? (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-medium text-red-800">Couldn&apos;t load subjects: {error}</p>
+        </div>
+      ) : null}
       <Card>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left text-sm">
@@ -26,7 +31,7 @@ export default async function AdminSubjectsPage() {
               </tr>
             </thead>
             <tbody>
-              {subjects.map((subject) => {
+              {(subjects ?? []).map((subject) => {
                 const aqa = subject.provisioning.find((entry) => entry.boardCode === "AQA");
                 const edexcel = subject.provisioning.find((entry) => entry.boardCode === "EDEXCEL");
                 return (

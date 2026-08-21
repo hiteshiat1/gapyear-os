@@ -4,8 +4,8 @@ import { getReferenceDiagnostics } from "@/lib/repositories/reference-data";
 import { listAllProfiles } from "@/lib/repositories/profiles";
 
 export default async function AdminOverviewPage() {
-  const [diagnostics, profiles] = await Promise.all([
-    getReferenceDiagnostics().catch(() => null),
+  const [{ data: diagnostics }, profiles] = await Promise.all([
+    getReferenceDiagnostics(),
     listAllProfiles(),
   ]);
 
