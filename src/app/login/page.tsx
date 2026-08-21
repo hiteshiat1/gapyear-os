@@ -1,4 +1,4 @@
-import { signInWithGoogleAction, signInWithPasswordAction, signUpWithPasswordAction } from "@/actions/auth-actions";
+import { signInWithPasswordAction, signUpWithPasswordAction } from "@/actions/auth-actions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Card, PageHeader } from "@/components/ui";
 
@@ -10,7 +10,7 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-950">
+    <main className="min-h-screen bg-[#FAFAFF] px-4 py-10 text-[#30343F]">
       <div className="mx-auto max-w-md">
         <PageHeader
           title="Sign in"
@@ -31,42 +31,37 @@ export default async function LoginPage({
             Supabase is not configured yet. Add environment variables before login will work.
           </div>
         ) : null}
-        <Card>
+        <Card className="border-[#E4D9FF]">
           <form action={signInWithPasswordAction} className="space-y-4">
             <label className="block text-sm font-medium">
               Email
-              <input name="email" type="email" required className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+              <input name="email" type="email" required className="mt-1 w-full rounded-md border border-[#E4D9FF] px-3 py-2 focus:border-[#273469] focus:outline-none" />
             </label>
             <label className="block text-sm font-medium">
               Password
-              <input name="password" type="password" required className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+              <input name="password" type="password" required className="mt-1 w-full rounded-md border border-[#E4D9FF] px-3 py-2 focus:border-[#273469] focus:outline-none" />
             </label>
-            <button className="w-full rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white">
+            <button className="w-full rounded-md bg-[#273469] px-4 py-2 text-sm font-medium text-[#FAFAFF] transition hover:bg-[#1E2749]">
               Sign in
             </button>
           </form>
-          <form action={signInWithGoogleAction} className="mt-3">
-            <button className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium">
-              Continue with Google
-            </button>
-          </form>
         </Card>
-        <Card className="mt-4">
+        <Card id="create-account" className="mt-4 border-[#E4D9FF] scroll-mt-10">
           <form action={signUpWithPasswordAction} className="space-y-4">
             <p className="text-sm font-medium">Create student account</p>
             <label className="block text-sm font-medium">
               Full name
-              <input name="fullName" placeholder="Your name" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+              <input name="fullName" placeholder="Your name" className="mt-1 w-full rounded-md border border-[#E4D9FF] px-3 py-2 focus:border-[#273469] focus:outline-none" />
             </label>
             <label className="block text-sm font-medium">
               Email
-              <input name="email" type="email" required className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+              <input name="email" type="email" required className="mt-1 w-full rounded-md border border-[#E4D9FF] px-3 py-2 focus:border-[#273469] focus:outline-none" />
             </label>
             <label className="block text-sm font-medium">
               Password
-              <input name="password" type="password" required minLength={8} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+              <input name="password" type="password" required minLength={8} className="mt-1 w-full rounded-md border border-[#E4D9FF] px-3 py-2 focus:border-[#273469] focus:outline-none" />
             </label>
-            <button className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium">
+            <button className="w-full rounded-md border border-[#273469] px-4 py-2 text-sm font-medium text-[#273469] transition hover:bg-[#E4D9FF]">
               Create account
             </button>
           </form>
