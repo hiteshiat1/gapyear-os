@@ -96,7 +96,9 @@ export async function seedReferenceData() {
     { onConflict: "qualification_type,grade" },
   ).throwOnError();
 
-  const [boards, subjects] = await Promise.all([getExamBoards(), getReferenceSubjects()]);
+  const [boardsResult, subjectsResult] = await Promise.all([getExamBoards(), getReferenceSubjects()]);
+  const boards = boardsResult.data;
+  const subjects = subjectsResult.data;
   const boardByCode = new Map(boards.map((board) => [board.code, board]));
   const subjectBySlug = new Map(subjects.map((subject) => [subject.slug, subject]));
 
@@ -138,7 +140,7 @@ export async function seedReferenceData() {
     ).throwOnError();
   }
 
-  const specifications = await getReferenceSpecifications();
+  const specifications = (await getReferenceSpecifications()).data;
   const specByCode = new Map(specifications.map((spec) => [`${spec.examBoardId}:${spec.specificationCode}`, spec]));
 
   for (const spec of referenceSpecifications) {
@@ -183,9 +185,11 @@ export async function seedReferenceData() {
   }
 }
 
-export async function getReferenceSubjects(): Promise<ReferenceSubjectOption[]> {
+export type ReferenceSubjectsResult = { data: ReferenceSubjectOption[]; error: string | null };
+
+export async function getReferenceSubjects(): Promise<ReferenceSubjectsResult> {
   const supabase = await getSupabaseForRead();
-  if (!supabase) return [];
+  if (!supabase) return { data: [], error: null };
 
   const { data, error } = await supabase
     .from("a_level_subjects")
@@ -197,21 +201,26 @@ export async function getReferenceSubjects(): Promise<ReferenceSubjectOption[]> 
 
   if (error) {
     console.error("getReferenceSubjects failed", error.message);
-    return [];
+    return { data: [], error: error.message };
   }
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    slug: row.slug,
-    name: row.name,
-    category: row.category,
-    topicSupportStatus: row.topic_support_status as ReferenceSubjectOption["topicSupportStatus"],
-  }));
+  return {
+    data: (data ?? []).map((row) => ({
+      id: row.id,
+      slug: row.slug,
+      name: row.name,
+      category: row.category,
+      topicSupportStatus: row.topic_support_status as ReferenceSubjectOption["topicSupportStatus"],
+    })),
+    error: null,
+  };
 }
 
-export async function getExamBoards() {
+export type ExamBoardsResult = { data: Array<{ id: string; code: string; name: string }>; error: string | null };
+
+export async function getExamBoards(): Promise<ExamBoardsResult> {
   const supabase = await getSupabaseForRead();
-  if (!supabase) return [];
+  if (!supabase) return { data: [], error: null };
 
   const { data, error } = await supabase
     .from("exam_boards")
@@ -221,15 +230,17 @@ export async function getExamBoards() {
 
   if (error) {
     console.error("getExamBoards failed", error.message);
-    return [];
+    return { data: [], error: error.message };
   }
 
-  return (data ?? []).map((row) => ({ id: row.id, code: row.code, name: row.name }));
+  return { data: (data ?? []).map((row) => ({ id: row.id, code: row.code, name: row.name })), error: null };
 }
 
-export async function getBoardOfferings(): Promise<ReferenceBoardOption[]> {
+export type BoardOfferingsResult = { data: ReferenceBoardOption[]; error: string | null };
+
+export async function getBoardOfferings(): Promise<BoardOfferingsResult> {
   const supabase = await getSupabaseForRead();
-  if (!supabase) return [];
+  if (!supabase) return { data: [], error: null };
 
   const { data, error } = await supabase
     .from("board_subject_offerings")
@@ -238,10 +249,10 @@ export async function getBoardOfferings(): Promise<ReferenceBoardOption[]> {
 
   if (error) {
     console.error("getBoardOfferings failed", error.message);
-    return [];
+    return { data: [], error: error.message };
   }
 
-  return ((data ?? []) as Array<{
+  const rows = ((data ?? []) as Array<{
     subject_id: string;
     topic_support_status: string;
     exam_boards: { id: string; code: string; name: string } | Array<{ id: string; code: string; name: string }> | null;
@@ -256,11 +267,15 @@ export async function getBoardOfferings(): Promise<ReferenceBoardOption[]> {
       topicSupportStatus: row.topic_support_status as ReferenceBoardOption["topicSupportStatus"],
     }];
   });
+
+  return { data: rows, error: null };
 }
 
-export async function getReferenceSpecifications(): Promise<ReferenceSpecificationOption[]> {
+export type ReferenceSpecificationsResult = { data: ReferenceSpecificationOption[]; error: string | null };
+
+export async function getReferenceSpecifications(): Promise<ReferenceSpecificationsResult> {
   const supabase = await getSupabaseForRead();
-  if (!supabase) return [];
+  if (!supabase) return { data: [], error: null };
 
   const { data, error } = await supabase
     .from("specifications")
@@ -270,22 +285,27 @@ export async function getReferenceSpecifications(): Promise<ReferenceSpecificati
 
   if (error) {
     console.error("getReferenceSpecifications failed", error.message);
-    return [];
+    return { data: [], error: error.message };
   }
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    examBoardId: row.exam_board_id,
-    subjectId: row.subject_id,
-    specificationCode: row.specification_code,
-    specificationName: row.specification_name,
-    topicSupportStatus: row.topic_support_status as ReferenceSpecificationOption["topicSupportStatus"],
-  }));
+  return {
+    data: (data ?? []).map((row) => ({
+      id: row.id,
+      examBoardId: row.exam_board_id,
+      subjectId: row.subject_id,
+      specificationCode: row.specification_code,
+      specificationName: row.specification_name,
+      topicSupportStatus: row.topic_support_status as ReferenceSpecificationOption["topicSupportStatus"],
+    })),
+    error: null,
+  };
 }
 
-export async function getReferenceOptions(): Promise<ReferenceComponentOption[]> {
+export type ReferenceOptionsResult = { data: ReferenceComponentOption[]; error: string | null };
+
+export async function getReferenceOptions(): Promise<ReferenceOptionsResult> {
   const supabase = await getSupabaseForRead();
-  if (!supabase) return [];
+  if (!supabase) return { data: [], error: null };
 
   const { data, error } = await supabase
     .from("specification_options")
@@ -295,18 +315,21 @@ export async function getReferenceOptions(): Promise<ReferenceComponentOption[]>
 
   if (error) {
     console.error("getReferenceOptions failed", error.message);
-    return [];
+    return { data: [], error: error.message };
   }
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    specificationId: row.specification_id,
-    code: row.code,
-    name: row.name,
-    optionGroup: row.option_group,
-    minSelect: row.min_select,
-    maxSelect: row.max_select,
-  }));
+  return {
+    data: (data ?? []).map((row) => ({
+      id: row.id,
+      specificationId: row.specification_id,
+      code: row.code,
+      name: row.name,
+      optionGroup: row.option_group,
+      minSelect: row.min_select,
+      maxSelect: row.max_select,
+    })),
+    error: null,
+  };
 }
 
 export async function getGradeOptions(): Promise<GradeOption[]> {
@@ -394,7 +417,7 @@ export async function provisionSubject(subjectId: string): Promise<ProvisionSubj
 
   const plan = resolveProvisioningPlan(subjectRow.slug, referenceSpecifications, syllabusDefinitions);
 
-  const boards = await getExamBoards();
+  const boards = (await getExamBoards()).data;
   const boardByCode = new Map(boards.map((board) => [board.code, board]));
 
   // Post-write outcomes, per board. Starts as a copy of the pre-computed plan
