@@ -53,12 +53,21 @@ export async function validateOnboardingSubjects(subjects: OnboardingSubjectInpu
     throw new Error("Duplicate subject selection is not allowed.");
   }
 
-  const [referenceSubjects, offerings, specifications, grades] = await Promise.all([
+  const [referenceSubjectsResult, offeringsResult, specificationsResult, grades] = await Promise.all([
     getReferenceSubjects(),
     getBoardOfferings(),
     getReferenceSpecifications(),
     getGradeOptions(),
   ]);
+
+  if (referenceSubjectsResult.error || offeringsResult.error || specificationsResult.error) {
+    throw new Error("Could not validate subjects — reference data is temporarily unavailable. Please try again shortly.");
+  }
+
+  const referenceSubjects = referenceSubjectsResult.data;
+  const offerings = offeringsResult.data;
+  const specifications = specificationsResult.data;
+
   const subjectIds = new Set(referenceSubjects.map((subject) => subject.id));
   const validGrades = new Set(["", "Not sure", "Not provided yet", ...grades.map((grade) => grade.grade)]);
   const targetGrades = new Set(["", "Not sure", ...grades.filter((grade) => grade.isTargetSelectable).map((grade) => grade.grade)]);
